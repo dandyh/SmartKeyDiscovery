@@ -24,13 +24,14 @@ public class App {
     Stack<TableRelationship> stackTRs = new Stack<>();
 
     public static void main(String[] args) throws Exception {
+        boolean isDestinationFound = false;
         StringBuilder sbTableRel = new StringBuilder("From,To\n");
         
         List<String> listUsedTablenames = new ArrayList<String>();
         String keyword = "Blauer see delikatessen";
         String seededTableName = "customers";
         String additionalKeyword = "forsterstr. 57,Mannheim";
-        String destination = "Meat Pie";
+        String destination = "Laura";
 
         String filesDir = "C:\\Users\\dandy\\OneDrive\\Documents\\NetBeansProjects\\SmartKeyDiscovery\\Data\\northwind-mongo-master";
         String[] fileNames = CommonFunction.getFilenamesInFolder(filesDir);
@@ -49,6 +50,7 @@ public class App {
                 }
             }
         }
+        System.out.print("Step 1 - Get initial seeded table - Done\n");
 
         Stack<TableRelationship> stackTableRel = new Stack<>();
         while (tblSeeded != null) {
@@ -58,7 +60,8 @@ public class App {
             List<TableRelationship> listRelTable = new ArrayList<>();
             //First step look for keyword in seeded table     
             tblSeeded = sd.searchKeywordTable(keyword, tblSeeded);
-            System.out.print("Step 1 - Done");
+            
+            System.out.print("Step 1a - Generate keyword table from seed\n");
 
             //Step 2 - look for possible relationship with other tables
             for (String tempTable : fileNames) {
@@ -72,6 +75,7 @@ public class App {
 
                     //Implement the ALGORITHM
                     ska = new SchemaKeyAlgorithm(listRelTemp);
+                    //listRelTemp = ska.getMultipleJoinKey();
                     TableRelationship relTemp = ska.getSingleJoinKey();
 
                     if (relTemp != null) {
@@ -88,13 +92,13 @@ public class App {
                         //Exclude used rel table for future
                         listUsedTablenames.add(relTemp.getTableNameTo());      
                         
-                        sbTableRel.append(relTemp.getTableNameFrom() + "," + relTemp.getTableNameTo() + "\n");
+                        sbTableRel.append(relTemp.getTableNameFrom()).append(",").append(relTemp.getTableNameTo()).append("\n");
                     }
                 }
 
             }
 
-            System.out.print("Step 2 - Done");
+            System.out.print("Step 2 - Look for possible relationship with other tables - Done\n");
 
             //Step 3 - Put relationships into stack with priority of table that have additional keyword
             if (!listRelTable.isEmpty()) {
@@ -105,23 +109,29 @@ public class App {
             }
                 
             //Method will check whether the stac is empty or not
-            System.out.print("Step 3 - Done");
+            
             if(!stackTableRel.empty()){
                 TableRelationship tr = stackTableRel.pop();
                 tblSeeded = tr.tableTo;
                 keyword = tr.getKeyword();
                 if(!CommonFunction.stringIsEmpty(tr.getDestinationKeywordFound())) {
                     tblSeeded = null;
-                    System.out.println("Destination found");
+                    isDestinationFound = true;
                 }
             }else{
                 tblSeeded = null;
             }
             
+            System.out.print("Step 3 - End of loop iteration!\n");
             
         }
-        
-        System.out.print("Done");
+        CommonFunction.generateFile("rel-output.csv", sbTableRel.toString(), false);
+        System.out.print("Done\n");
+        if(isDestinationFound){
+            System.out.println("Destination found!!!!!!!!!!!");
+        }else{
+            System.out.println("Destination NOT found!");
+        }
         //sTR.push(item)
 
 //      

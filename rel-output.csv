@@ -1,0 +1,9 @@
+From,To
+customers,orders
+customers,suppliers
+orders,employee-territories
+orders,employees
+orders,order-details
+orders,shippers
+order-details,products
+

@@ -7,6 +7,7 @@ package com.centrica.relationshipalgorithm;
 
 import com.centrica.commonfunction.CommonFunction;
 import com.centrica.entity.TableRelationship;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,6 +29,16 @@ public class SchemaKeyAlgorithm {
             }
         }
         return null;
+    }
+    
+    public List<TableRelationship> getMultipleJoinKey(){
+        List<TableRelationship> listTableRel = new ArrayList<>();
+        for(TableRelationship trTemp : listTableRelationship){
+            if(CommonFunction.stringEquals(trTemp.getColumnNameFrom(), trTemp.getColumnNameTo())){
+                listTableRel.add(trTemp);
+            }
+        }
+        return listTableRel;
     }
     
     
