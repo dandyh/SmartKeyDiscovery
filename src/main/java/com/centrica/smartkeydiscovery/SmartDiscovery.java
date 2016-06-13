@@ -42,15 +42,28 @@ public class SmartDiscovery {
         }
         return matchedKeywordsTable;
     }
-    
-     //Search additional field within table and return boolean (return TRUE, IF found)
+
+    //Search additional field within table and return boolean (return TRUE, IF found)
     public String getTableContainsKeywords(String[] keywords, Table inputTable) throws Exception {
         for (String[] arrayRecord : inputTable.rows) {
             for (String record : arrayRecord) {
-                for(String keywordTemp : keywords){
+                for (String keywordTemp : keywords) {
                     if (CommonFunction.getCleanedString(record).contains(CommonFunction.getCleanedString(keywordTemp))) {
                         return keywordTemp;
                     }
+                }
+            }
+        }
+        return null;
+    }
+
+    //Search additional field within table and return boolean (return TRUE, IF found)
+    public String getTableContainsDestinationKeyword(String keyword, Table inputTable) throws Exception {
+        for (String[] arrayRecord : inputTable.rows) {
+            for (String record : arrayRecord) {
+                if (CommonFunction.getCleanedString(record).contains(CommonFunction.getCleanedString(keyword))) {
+                    return keyword;
+
                 }
             }
         }
@@ -62,12 +75,12 @@ public class SmartDiscovery {
         int index = 0;
         List<TableRelationship> rel = new ArrayList<TableRelationship>();
         for (String[] arrayRecord : inputTable.rows) {
-            
+
             //Exit loop if number of search is exceed the search limit
             if (index >= parseInt(CommonFunction.readProperty("searchlimit"))) {
                 break;
             }
-            
+
             for (int i = 0; i < inputTable.columnName.length; i++) {
                 if (CommonFunction.stringEquals(arrayRecord[i], keyword)) {
                     TableRelationship relPartial = new TableRelationship(keyword, inputTable.getTableName(), inputTable.columnName[i], i);
@@ -114,23 +127,33 @@ public class SmartDiscovery {
         }
         return listRel;
     }
-    
+
     //This prioritizes relationship without additional keyword 
     //Because we will use stack which will be LIFO (Last In First Out)
     public List<TableRelationship> reorderRelationshipBasedonAdditionalKeyword(List<TableRelationship> listTRInput) throws Exception {
         List<TableRelationship> trOutput = new ArrayList<>();
-        //Put relationship without additional keywords first
-        for(int i=0;i<listTRInput.size();i++){
-            if(CommonFunction.stringIsEmpty(listTRInput.get(i).getAdditionalKeywordFound())){
+        //Put relationship without additional keywords and destination first
+        for (int i = 0; i < listTRInput.size(); i++) {
+            if (CommonFunction.stringIsEmpty(listTRInput.get(i).getAdditionalKeywordFound()) && 
+                    CommonFunction.stringIsEmpty(listTRInput.get(i).getDestinationKeywordFound())) {
                 trOutput.add(listTRInput.get(i));
             }
         }
         //Put relationship WITH additional keywords later
-        for(int i=0;i<listTRInput.size();i++){
-            if(!CommonFunction.stringIsEmpty(listTRInput.get(i).getAdditionalKeywordFound())){
+        for (int i = 0; i < listTRInput.size(); i++) {
+            if (!CommonFunction.stringIsEmpty(listTRInput.get(i).getAdditionalKeywordFound())&& 
+                    CommonFunction.stringIsEmpty(listTRInput.get(i).getDestinationKeywordFound())) {
                 trOutput.add(listTRInput.get(i));
             }
         }
+        
+        //Put destination Table at the last
+        for (int i = 0; i < listTRInput.size(); i++) {
+            if (!CommonFunction.stringIsEmpty(listTRInput.get(i).getDestinationKeywordFound())) {
+                trOutput.add(listTRInput.get(i));
+            }
+        }
+        
         return trOutput;
     }
 

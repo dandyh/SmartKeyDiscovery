@@ -17,24 +17,24 @@ public class TableRelationship {
     private int columnIndexFrom;
     private String tableNameTo;
     private String columnNameTo;
-    private int columnIndexTo;    
+    private int columnIndexTo;
     private boolean partialRelationship;
-    private String additionalKeywordFound; 
+    private String additionalKeywordFound;
+    private String destinationKeywordFound;
 
-    
     public Table tableTo;
 
-    public TableRelationship(String keyword,String tableNameTo, String columnNameTo, int columnIndexTo){
+    public TableRelationship(String keyword, String tableNameTo, String columnNameTo, int columnIndexTo) {
         this.keyword = keyword;
         this.tableNameTo = tableNameTo;
         this.columnNameTo = columnNameTo;
         this.columnIndexTo = columnIndexTo;
         this.partialRelationship = true;
     }
-    
-    public TableRelationship(String keyword,String tableNameFrom, String columnNameFrom, int columnIndexFrom,
-            String tableNameTo, String columnNameTo, int columnIndexTo){
-        
+
+    public TableRelationship(String keyword, String tableNameFrom, String columnNameFrom, int columnIndexFrom,
+            String tableNameTo, String columnNameTo, int columnIndexTo) {
+
         this.keyword = keyword;
         this.tableNameFrom = tableNameFrom;
         this.columnNameFrom = columnNameFrom;
@@ -44,25 +44,25 @@ public class TableRelationship {
         this.columnIndexTo = columnIndexTo;
         this.partialRelationship = false;
     }
-    
-    public String toString(boolean includeHeader){
-        StringBuffer str = new StringBuffer();
-        if(includeHeader) str.append("keyword,tableNameFrom,columnNameFrom,columnIndexFrom,tableNameTo,columnNameTo,columnIndexTo\n");
-        
-        str.append(String.format("%s,%s,%s,%s,%s,%s,%s", 
-            this.keyword,
-            this.tableNameFrom,
-            this.columnNameFrom,
-            this.columnIndexFrom,
-            this.tableNameTo,
-            this.columnNameTo,
-            this.columnIndexTo));
 
-        
-        
+    public String toString(boolean includeHeader) {
+        StringBuffer str = new StringBuffer();
+        if (includeHeader) {
+            str.append("keyword,tableNameFrom,columnNameFrom,columnIndexFrom,tableNameTo,columnNameTo,columnIndexTo\n");
+        }
+
+        str.append(String.format("%s,%s,%s,%s,%s,%s,%s",
+                this.keyword,
+                this.tableNameFrom,
+                this.columnNameFrom,
+                this.columnIndexFrom,
+                this.tableNameTo,
+                this.columnNameTo,
+                this.columnIndexTo));
+
         return str.toString();
     }
-    
+
     public String getKeyword() {
         return keyword;
     }
@@ -118,7 +118,7 @@ public class TableRelationship {
     public void setColumnIndexTo(int columnIndexTo) {
         this.columnIndexTo = columnIndexTo;
     }
-    
+
     public boolean isPartialRelationship() {
         return partialRelationship;
     }
@@ -126,7 +126,15 @@ public class TableRelationship {
     public void setPartialRelationship(boolean partialRelationship) {
         this.partialRelationship = partialRelationship;
     }
-    
+
+    public String getDestinationKeywordFound() {
+        return destinationKeywordFound;
+    }
+
+    public void setDestinationKeywordFound(String destinationKeywordFound) {
+        this.destinationKeywordFound = destinationKeywordFound;
+    }
+
     public String getAdditionalKeywordFound() {
         return additionalKeywordFound;
     }

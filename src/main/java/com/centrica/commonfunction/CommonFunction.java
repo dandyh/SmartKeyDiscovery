@@ -72,7 +72,7 @@ public class CommonFunction {
         }
     }
 
-    public static void generateCsvFile(String fileName, String content, boolean isAppend) throws Exception {
+    public static void generateFile(String fileName, String content, boolean isAppend) throws Exception {
         try {
             FileWriter writer = new FileWriter(fileName,isAppend);
             
@@ -99,5 +99,9 @@ public class CommonFunction {
             fileNames[i] = directoryListing[i].getName();
         }
         return fileNames;
+    }
+    
+    public static String getFilenameOnly(String name){
+        return name.split("\\.")[0];
     }
 }

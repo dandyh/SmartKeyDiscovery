@@ -20,64 +20,110 @@ import java.util.Stack;
  * @author dandy
  */
 public class App {
+
     Stack<TableRelationship> stackTRs = new Stack<>();
+
     public static void main(String[] args) throws Exception {
+        StringBuilder sbTableRel = new StringBuilder("From,To\n");
+        
+        List<String> listUsedTablenames = new ArrayList<String>();
         String keyword = "Blauer see delikatessen";
         String seededTableName = "customers";
         String additionalKeyword = "forsterstr. 57,Mannheim";
-        String destination = "Meat pie";
+        String destination = "Meat Pie";
 
         String filesDir = "C:\\Users\\dandy\\OneDrive\\Documents\\NetBeansProjects\\SmartKeyDiscovery\\Data\\northwind-mongo-master";
         String[] fileNames = CommonFunction.getFilenamesInFolder(filesDir);
 
-        
-        //Look for seeded table
         Table tblSeeded = new Table(seededTableName);
+
+        //STEP 1 - Get initial Seeded table
+        //Look for seeded table            
         for (String tempTable : fileNames) {
-            if (CommonFunction.stringContains(tempTable, seededTableName)) {
-                tblSeeded.loadFromCSV(filesDir + "\\" + tempTable);
-            }
-        }
+            //Exclude table that have already checked
+            if (!listUsedTablenames.contains(CommonFunction.getFilenameOnly(tempTable))) {
+                if (CommonFunction.stringContains(tempTable, seededTableName)) {
+                    tblSeeded.loadFromCSV(filesDir + "\\" + tempTable);
 
-        SmartDiscovery sd = new SmartDiscovery();
-        SchemaKeyAlgorithm ska;
-        List<TableRelationship> listRelTable = new ArrayList<>();
-        //First step look for keyword in seeded table     
-        tblSeeded = sd.searchKeywordTable(keyword, tblSeeded);
-        System.out.print("Step 1 - Done");
-
-        //Step 2 - look for possible relationship with other tables
-        for (String tempTable : fileNames) {
-            String tempTableName = tempTable.split("\\.")[0];
-            if (!CommonFunction.stringEquals(tempTableName, seededTableName)) {
-                String fileLocationTemp = filesDir + "\\" + tempTable;
-                Table temp = new Table(tempTableName);
-                temp.loadFromCSV(fileLocationTemp);
-                List<TableRelationship> listRelTemp = sd.searchTableRelationship(tblSeeded, temp);
-                ska = new SchemaKeyAlgorithm(listRelTemp);
-                TableRelationship relTemp = ska.getSingleJoinKey();
-
-                if (relTemp != null) {
-                    //Get additional keyword (If exists from the table relationship)
-                    String additionalKeywordTemp = sd.getTableContainsKeywords(additionalKeyword.split(","), relTemp.tableTo);
-                    relTemp.setAdditionalKeywordFound(additionalKeywordTemp);
-                    listRelTable.add(relTemp);
+                    listUsedTablenames.add(seededTableName);
                 }
             }
         }
 
-        System.out.print("Step 2 - Done");
-        
+        Stack<TableRelationship> stackTableRel = new Stack<>();
+        while (tblSeeded != null) {
 
-        //Step 3 - Put relationships into stack with priority of table that have additional keyword
-        listRelTable = sd.reorderRelationshipBasedonAdditionalKeyword(listRelTable);
-        Stack<TableRelationship> sTR = new Stack<>();
-        for(TableRelationship trTemp : listRelTable){
-            sTR.push(trTemp);
+            SmartDiscovery sd = new SmartDiscovery();
+            SchemaKeyAlgorithm ska;
+            List<TableRelationship> listRelTable = new ArrayList<>();
+            //First step look for keyword in seeded table     
+            tblSeeded = sd.searchKeywordTable(keyword, tblSeeded);
+            System.out.print("Step 1 - Done");
+
+            //Step 2 - look for possible relationship with other tables
+            for (String tempTable : fileNames) {
+                String tempTableName = CommonFunction.getFilenameOnly(tempTable);
+                //Exclude table that has been used
+                if (!listUsedTablenames.contains(tempTableName)) {
+                    String fileLocationTemp = filesDir + "\\" + tempTable;
+                    Table temp = new Table(tempTableName);
+                    temp.loadFromCSV(fileLocationTemp);
+                    List<TableRelationship> listRelTemp = sd.searchTableRelationship(tblSeeded, temp);
+
+                    //Implement the ALGORITHM
+                    ska = new SchemaKeyAlgorithm(listRelTemp);
+                    TableRelationship relTemp = ska.getSingleJoinKey();
+
+                    if (relTemp != null) {
+                        //Check whether the table contains the destination keyword
+                        String destinationKeywordTemp = sd.getTableContainsDestinationKeyword(destination, relTemp.tableTo);
+                        relTemp.setDestinationKeywordFound(destinationKeywordTemp);
+                        
+                        //Get additional keyword (If exists from the table relationship)
+                        String additionalKeywordTemp = sd.getTableContainsKeywords(additionalKeyword.split(","), relTemp.tableTo);
+                        relTemp.setAdditionalKeywordFound(additionalKeywordTemp);
+                        
+                        listRelTable.add(relTemp);
+                        
+                        //Exclude used rel table for future
+                        listUsedTablenames.add(relTemp.getTableNameTo());      
+                        
+                        sbTableRel.append(relTemp.getTableNameFrom() + "," + relTemp.getTableNameTo() + "\n");
+                    }
+                }
+
+            }
+
+            System.out.print("Step 2 - Done");
+
+            //Step 3 - Put relationships into stack with priority of table that have additional keyword
+            if (!listRelTable.isEmpty()) {
+                listRelTable = sd.reorderRelationshipBasedonAdditionalKeyword(listRelTable);
+                for (TableRelationship trTemp : listRelTable) {
+                    stackTableRel.push(trTemp);
+                }
+            }
+                
+            //Method will check whether the stac is empty or not
+            System.out.print("Step 3 - Done");
+            if(!stackTableRel.empty()){
+                TableRelationship tr = stackTableRel.pop();
+                tblSeeded = tr.tableTo;
+                keyword = tr.getKeyword();
+                if(!CommonFunction.stringIsEmpty(tr.getDestinationKeywordFound())) {
+                    tblSeeded = null;
+                    System.out.println("Destination found");
+                }
+            }else{
+                tblSeeded = null;
+            }
+            
+            
         }
         
-        System.out.print("Step 3 - Done");
+        System.out.print("Done");
         //sTR.push(item)
+
 //      
 //        
 //      Table tblOrders = new Table("Orders");
