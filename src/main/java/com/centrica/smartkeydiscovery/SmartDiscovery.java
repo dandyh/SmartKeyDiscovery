@@ -44,15 +44,17 @@ public class SmartDiscovery {
     }
     
      //Search additional field within table and return boolean (return TRUE, IF found)
-    public boolean isTableContainsKeyword(String keyword, Table inputTable) throws Exception {
+    public String getTableContainsKeywords(String[] keywords, Table inputTable) throws Exception {
         for (String[] arrayRecord : inputTable.rows) {
             for (String record : arrayRecord) {
-                if (CommonFunction.getCleanedString(record).contains(CommonFunction.getCleanedString(keyword))) {
-                    return true;
+                for(String keywordTemp : keywords){
+                    if (CommonFunction.getCleanedString(record).contains(CommonFunction.getCleanedString(keywordTemp))) {
+                        return keywordTemp;
+                    }
                 }
             }
         }
-        return false;
+        return null;
     }
 
     //Search keyword within table and return the relationship object (Which contains indexes and the matching rows)

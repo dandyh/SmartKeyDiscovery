@@ -81,18 +81,20 @@ public class SmartDiscoveryTest {
     }
     
     @Test
-    public void isTableContainsKeywordDifferentUpperLowerCase() throws Exception {
+    public void getTableContainsKeywordsDifferentUpperLowerCase() throws Exception {
         SmartDiscovery sd = new SmartDiscovery();
-        boolean test = sd.isTableContainsKeyword("ARouT", tbl);
+        String[] strArray = {"ARouT", "Dandy"};
+        String test = sd.getTableContainsKeywords(strArray, tbl);
         
-        assertEquals(test,true);
+        assertEquals(test,"ARouT");
     }
     
     @Test
     public void isTableContainsKeywordDifferentNotFound() throws Exception {
         SmartDiscovery sd = new SmartDiscovery();
-        boolean test = sd.isTableContainsKeyword("ARouT123", tbl);
+        String[] strArray = {"ARouT123"};
+        String test = sd.getTableContainsKeywords(strArray, tbl);
         
-        assertEquals(test,false);
+        assertEquals(test,null);
     }
 }

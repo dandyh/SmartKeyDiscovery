@@ -26,7 +26,7 @@ public class App {
     public static void main(String[] args) throws Exception { 
       String keyword = "Blauer see delikatessen";
       String seededTable = "customers";
-      String additionalKeyword = "forsterstr. 57";
+      String additionalKeyword = "forsterstr. 57,Mannheim";
       String destination = "Meat pie";
       
       String filesDir = "C:\\Users\\dandy\\OneDrive\\Documents\\NetBeansProjects\\SmartKeyDiscovery\\Data\\northwind-mongo-master";
@@ -57,7 +57,13 @@ public class App {
               List<TableRelationship> listRelTemp = sd.searchTableRelationship(tblSeeded, temp);
               ska = new SchemaKeyAlgorithm(listRelTemp);
               TableRelationship relTemp = ska.getSingleJoinKey();
-              if(relTemp != null) listRelTable.add(relTemp);
+              
+              if(relTemp != null) {
+                    //Get additional keyword (If exists from the table relationship)
+                    String additionalKeywordTemp = sd.getTableContainsKeywords(additionalKeyword.split(","), relTemp.tableTo);
+                    relTemp.setAdditionalKeywordFound(additionalKeywordTemp);
+                    listRelTable.add(relTemp);
+              }
           }
       }
       

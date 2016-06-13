@@ -19,6 +19,7 @@ public class TableRelationship {
     private String columnNameTo;
     private int columnIndexTo;    
     private boolean partialRelationship;
+    private String additionalKeywordFound; 
 
     
     public Table tableTo;
@@ -126,4 +127,11 @@ public class TableRelationship {
         this.partialRelationship = partialRelationship;
     }
     
+    public String getAdditionalKeywordFound() {
+        return additionalKeywordFound;
+    }
+
+    public void setAdditionalKeywordFound(String additionalKeywordFound) {
+        this.additionalKeywordFound = additionalKeywordFound;
+    }
 }
