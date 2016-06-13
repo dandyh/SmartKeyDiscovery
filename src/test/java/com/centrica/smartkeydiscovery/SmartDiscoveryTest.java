@@ -148,4 +148,72 @@ public class SmartDiscoveryTest {
         
     }
     
+    
+     @Test
+    public void searchTableRelationshipTableSize() throws Exception {
+        String keyword = "Blauer see delikatessen";
+        String seededTableName = "customers";
+        String additionalKeyword = "forsterstr. 57,Mannheim";
+        
+        String filesDir = "C:\\Users\\dandy\\OneDrive\\Documents\\NetBeansProjects\\SmartKeyDiscovery\\Data\\northwind-mongo-master";
+        String[] fileNames = CommonFunction.getFilenamesInFolder(filesDir);
+
+        //Look for seeded table
+        Table tblSeeded = new Table(seededTableName);
+        for (String tempTable : fileNames) {
+            if (CommonFunction.stringContains(tempTable, seededTableName)) {
+                tblSeeded.loadFromCSV(filesDir + "\\" + tempTable);
+            }
+        }
+
+        SmartDiscovery sd = new SmartDiscovery();
+        SchemaKeyAlgorithm ska;
+        List<TableRelationship> listRelTable = new ArrayList<>();
+        //First step look for keyword in seeded table     
+        tblSeeded = sd.searchKeywordTable(keyword, tblSeeded);
+        
+        Table tblOrders = new Table("orders");
+        tblOrders.loadFromCSV(filesDir + "\\" + "orders.csv");
+        
+        listRelTable = sd.searchTableRelationship(tblSeeded, tblOrders);
+        
+        System.out.print("dada3");
+        assertEquals(parseInt(CommonFunction.readProperty("searchlimit")),listRelTable.get(0).tableTo.rows.size());
+    }
+    
+    @Test
+     public void searchTableRelationshipContent() throws Exception {
+        String keyword = "Blauer see delikatessen";
+        String seededTableName = "customers";
+        String additionalKeyword = "forsterstr. 57,Mannheim";
+        
+        String filesDir = "C:\\Users\\dandy\\OneDrive\\Documents\\NetBeansProjects\\SmartKeyDiscovery\\Data\\northwind-mongo-master";
+        String[] fileNames = CommonFunction.getFilenamesInFolder(filesDir);
+
+        //Look for seeded table
+        Table tblSeeded = new Table(seededTableName);
+        for (String tempTable : fileNames) {
+            if (CommonFunction.stringContains(tempTable, seededTableName)) {
+                tblSeeded.loadFromCSV(filesDir + "\\" + tempTable);
+            }
+        }
+
+        SmartDiscovery sd = new SmartDiscovery();
+        SchemaKeyAlgorithm ska;
+        List<TableRelationship> listRelTable = new ArrayList<>();
+        //First step look for keyword in seeded table     
+        tblSeeded = sd.searchKeywordTable(keyword, tblSeeded);
+        
+        Table tblOrders = new Table("orders");
+        tblOrders.loadFromCSV(filesDir + "\\" + "orders.csv");
+        
+        listRelTable = sd.searchTableRelationship(tblSeeded, tblOrders);
+        
+        System.out.print("dada3");
+        assertEquals("BLAUS",listRelTable.get(0).getKeyword());
+        assertEquals("Blauer See Delikatessen",listRelTable.get(1).getKeyword());
+        assertEquals(parseInt(CommonFunction.readProperty("searchlimit")),listRelTable.get(1).tableTo.rows.size());
+        assertEquals("Mannheim",listRelTable.get(3).getKeyword());
+    }
+    
 }

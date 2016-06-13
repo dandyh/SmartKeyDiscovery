@@ -25,13 +25,13 @@ public class App {
 
     public static void main(String[] args) throws Exception {
         boolean isDestinationFound = false;
-        StringBuilder sbTableRel = new StringBuilder("From,To\n");
-        
+        StringBuilder sbTableRel = new StringBuilder("From,To,Keyword,ColumnFrom,ColumnTo\n");
+
         List<String> listUsedTablenames = new ArrayList<String>();
         String keyword = "Blauer see delikatessen";
         String seededTableName = "customers";
         String additionalKeyword = "forsterstr. 57,Mannheim";
-        String destination = "Laura";
+        String destination = "meat pie";// "Peacock";//"Carnarvon Tigers";//Meat pie";//"laura"; //"0.15";//"Aniseed Syrup";// "Meat pie";
 
         String filesDir = "C:\\Users\\dandy\\OneDrive\\Documents\\NetBeansProjects\\SmartKeyDiscovery\\Data\\northwind-mongo-master";
         String[] fileNames = CommonFunction.getFilenamesInFolder(filesDir);
@@ -60,7 +60,7 @@ public class App {
             List<TableRelationship> listRelTable = new ArrayList<>();
             //First step look for keyword in seeded table     
             tblSeeded = sd.searchKeywordTable(keyword, tblSeeded);
-            
+
             System.out.print("Step 1a - Generate keyword table from seed\n");
 
             //Step 2 - look for possible relationship with other tables
@@ -75,25 +75,33 @@ public class App {
 
                     //Implement the ALGORITHM
                     ska = new SchemaKeyAlgorithm(listRelTemp);
-                    //listRelTemp = ska.getMultipleJoinKey();
-                    TableRelationship relTemp = ska.getSingleJoinKey();
+                    listRelTemp = ska.getMultipleJoinKey();
 
-                    if (relTemp != null) {
-                        //Check whether the table contains the destination keyword
-                        String destinationKeywordTemp = sd.getTableContainsDestinationKeyword(destination, relTemp.tableTo);
-                        relTemp.setDestinationKeywordFound(destinationKeywordTemp);
-                        
-                        //Get additional keyword (If exists from the table relationship)
-                        String additionalKeywordTemp = sd.getTableContainsKeywords(additionalKeyword.split(","), relTemp.tableTo);
-                        relTemp.setAdditionalKeywordFound(additionalKeywordTemp);
-                        
-                        listRelTable.add(relTemp);
-                        
-                        //Exclude used rel table for future
-                        listUsedTablenames.add(relTemp.getTableNameTo());      
-                        
-                        sbTableRel.append(relTemp.getTableNameFrom()).append(",").append(relTemp.getTableNameTo()).append("\n");
+                    for (TableRelationship relTemp : listRelTemp) {
+                        if (relTemp != null) {
+                            //Check whether the table contains the destination keyword
+                            String destinationKeywordTemp = sd.getTableContainsDestinationKeyword(destination, relTemp.tableTo);
+                            relTemp.setDestinationKeywordFound(destinationKeywordTemp);
+
+                            //Get additional keyword (If exists from the table relationship)
+                            String additionalKeywordTemp = sd.getTableContainsKeywords(additionalKeyword.split(","), relTemp.tableTo);
+                            relTemp.setAdditionalKeywordFound(additionalKeywordTemp);
+
+                            listRelTable.add(relTemp);
+
+                            //Exclude used rel table for future
+                            listUsedTablenames.add(relTemp.getTableNameTo());
+                            
+                            if((relTemp.getTableNameFrom() + relTemp.getTableNameTo()).equals("ordersshippers")){
+                                System.out.print("order-details,products");
+                            }
+
+                            sbTableRel.append(relTemp.getTableNameFrom()).append(",").append(relTemp.getTableNameTo()).append(",");
+                            sbTableRel.append(relTemp.getKeyword()).append(",").append(relTemp.getColumnNameFrom()).append(",").append(relTemp.getColumnNameTo()).append("\n");
+                        }
                     }
+
+                    //TableRelationship relTemp = ska.getSingleJoinKey();
                 }
 
             }
@@ -104,32 +112,35 @@ public class App {
             if (!listRelTable.isEmpty()) {
                 listRelTable = sd.reorderRelationshipBasedonAdditionalKeyword(listRelTable);
                 for (TableRelationship trTemp : listRelTable) {
-                    stackTableRel.push(trTemp);
+                    if (!CommonFunction.stringIsEmpty(trTemp.getDestinationKeywordFound())) {
+                        tblSeeded = null;
+                        isDestinationFound = true;
+                        stackTableRel.clear();
+                    }else{
+                        stackTableRel.push(trTemp);
+                    }
+                    
                 }
             }
-                
+
             //Method will check whether the stac is empty or not
-            
-            if(!stackTableRel.empty()){
+            if (!stackTableRel.empty()) {
                 TableRelationship tr = stackTableRel.pop();
                 tblSeeded = tr.tableTo;
                 keyword = tr.getKeyword();
-                if(!CommonFunction.stringIsEmpty(tr.getDestinationKeywordFound())) {
-                    tblSeeded = null;
-                    isDestinationFound = true;
-                }
-            }else{
+
+            } else {
                 tblSeeded = null;
             }
-            
+
             System.out.print("Step 3 - End of loop iteration!\n");
-            
+
         }
         CommonFunction.generateFile("rel-output.csv", sbTableRel.toString(), false);
         System.out.print("Done\n");
-        if(isDestinationFound){
+        if (isDestinationFound) {
             System.out.println("Destination found!!!!!!!!!!!");
-        }else{
+        } else {
             System.out.println("Destination NOT found!");
         }
         //sTR.push(item)
