@@ -137,7 +137,27 @@ public class SmartDiscovery {
                 }
             }
         }
-
+        
+        //Combine listRel that has same column from and to
+//        List<TableRelationship> listRelOutput = new ArrayList<>();
+//        List<String> listExlcudeColumnFromTo = new ArrayList<>();
+//        
+//        for (TableRelationship tempRel : listRel) {
+//             if (!listExlcudeColumnFromTo.contains(tempRel.getColumnNameTo())) {
+//                listExlcudeColumnFromTo.add(tempRel.getColumnNameFrom()+tempRel.getColumnNameTo());
+//                List<String[]> relRows = new ArrayList<>();
+//                for (TableRelationship tempRelInside : listRel) {
+//                    if((tempRelInside.getColumnNameFrom()+tempRelInside.getColumnNameTo()).equals(tempRel.getColumnNameFrom()+tempRel.getColumnNameTo())){
+//                        for(String[] tempRow : tempRelInside.tableTo.rows){
+//                            relRows.add(tempRow);
+//                        }
+//                    }
+//                }
+//                tempRel.tableTo.rows = relRows;                
+//                listRelOutput.add(tempRel);
+//             }
+//        }
+        
         return listRel;
     }
 
