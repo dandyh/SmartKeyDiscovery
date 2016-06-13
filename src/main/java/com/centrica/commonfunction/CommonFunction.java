@@ -18,6 +18,11 @@ import java.util.Properties;
  */
 public class CommonFunction {
 
+    public static boolean stringIsEmpty(String a) {
+        if(a == null) return true;
+        return a.trim().isEmpty();
+    }
+    
     public static boolean stringEquals(String a, String b) {
         if (a.isEmpty()) {
             return false;

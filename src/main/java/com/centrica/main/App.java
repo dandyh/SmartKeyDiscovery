@@ -11,63 +11,73 @@ import com.centrica.entity.TableRelationship;
 import com.centrica.relationshipalgorithm.SchemaKeyAlgorithm;
 import com.centrica.smartkeydiscovery.SmartDiscovery;
 
-
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
+import java.util.Stack;
+
 /**
  *
  * @author dandy
  */
 public class App {
-    public static void main(String[] args) throws Exception { 
-      String keyword = "Blauer see delikatessen";
-      String seededTable = "customers";
-      String additionalKeyword = "forsterstr. 57,Mannheim";
-      String destination = "Meat pie";
-      
-      String filesDir = "C:\\Users\\dandy\\OneDrive\\Documents\\NetBeansProjects\\SmartKeyDiscovery\\Data\\northwind-mongo-master";
-      String[] fileNames = CommonFunction.getFilenamesInFolder(filesDir);     
-      
-      //Look for seeded table
-      Table tblSeeded = new Table(seededTable);
-      for(String tempTable : fileNames){
-          if(CommonFunction.stringContains(tempTable, seededTable)){
-              tblSeeded.loadFromCSV(filesDir + "\\" + tempTable);
-          }
-      }
-      
-      SmartDiscovery sd = new SmartDiscovery();
-      SchemaKeyAlgorithm ska;
-      List<TableRelationship> listRelTable = new ArrayList<>();
-      //First step look for keyword in seeded table     
-      tblSeeded = sd.searchKeywordTable(keyword, tblSeeded);   
-      System.out.print("Step 1 - Done"); 
-      
-      //Second step to look for possible relationships with other tables
-      for(String tempTable : fileNames){
-          String tempTableName = tempTable.split("\\.")[0];
-          if(!CommonFunction.stringEquals(tempTableName, seededTable)){
-              String fileLocationTemp = filesDir + "\\" + tempTable;
-              Table temp = new Table(tempTableName);
-              temp.loadFromCSV(fileLocationTemp);
-              List<TableRelationship> listRelTemp = sd.searchTableRelationship(tblSeeded, temp);
-              ska = new SchemaKeyAlgorithm(listRelTemp);
-              TableRelationship relTemp = ska.getSingleJoinKey();
-              
-              if(relTemp != null) {
+    Stack<TableRelationship> stackTRs = new Stack<>();
+    public static void main(String[] args) throws Exception {
+        String keyword = "Blauer see delikatessen";
+        String seededTableName = "customers";
+        String additionalKeyword = "forsterstr. 57,Mannheim";
+        String destination = "Meat pie";
+
+        String filesDir = "C:\\Users\\dandy\\OneDrive\\Documents\\NetBeansProjects\\SmartKeyDiscovery\\Data\\northwind-mongo-master";
+        String[] fileNames = CommonFunction.getFilenamesInFolder(filesDir);
+
+        
+        //Look for seeded table
+        Table tblSeeded = new Table(seededTableName);
+        for (String tempTable : fileNames) {
+            if (CommonFunction.stringContains(tempTable, seededTableName)) {
+                tblSeeded.loadFromCSV(filesDir + "\\" + tempTable);
+            }
+        }
+
+        SmartDiscovery sd = new SmartDiscovery();
+        SchemaKeyAlgorithm ska;
+        List<TableRelationship> listRelTable = new ArrayList<>();
+        //First step look for keyword in seeded table     
+        tblSeeded = sd.searchKeywordTable(keyword, tblSeeded);
+        System.out.print("Step 1 - Done");
+
+        //Step 2 - look for possible relationship with other tables
+        for (String tempTable : fileNames) {
+            String tempTableName = tempTable.split("\\.")[0];
+            if (!CommonFunction.stringEquals(tempTableName, seededTableName)) {
+                String fileLocationTemp = filesDir + "\\" + tempTable;
+                Table temp = new Table(tempTableName);
+                temp.loadFromCSV(fileLocationTemp);
+                List<TableRelationship> listRelTemp = sd.searchTableRelationship(tblSeeded, temp);
+                ska = new SchemaKeyAlgorithm(listRelTemp);
+                TableRelationship relTemp = ska.getSingleJoinKey();
+
+                if (relTemp != null) {
                     //Get additional keyword (If exists from the table relationship)
                     String additionalKeywordTemp = sd.getTableContainsKeywords(additionalKeyword.split(","), relTemp.tableTo);
                     relTemp.setAdditionalKeywordFound(additionalKeywordTemp);
                     listRelTable.add(relTemp);
-              }
-          }
-      }
-      
-      System.out.print("Step 2 - Done");
+                }
+            }
+        }
+
+        System.out.print("Step 2 - Done");
+        
+
+        //Step 3 - Put relationships into stack with priority of table that have additional keyword
+        listRelTable = sd.reorderRelationshipBasedonAdditionalKeyword(listRelTable);
+        Stack<TableRelationship> sTR = new Stack<>();
+        for(TableRelationship trTemp : listRelTable){
+            sTR.push(trTemp);
+        }
+        
+        System.out.print("Step 3 - Done");
+        //sTR.push(item)
 //      
 //        
 //      Table tblOrders = new Table("Orders");
@@ -93,7 +103,7 @@ public class App {
 //      CommonFunction.generateCsvFile(tempFileName, tr.toString(true),true);
 //      CommonFunction.generateCsvFile(tempFileName, "\n" + tr.tableTo.toString(),true);
 //      
-      //Print the relationship table
+        //Print the relationship table
 //      for (TableRelationship tr : temp){
 //          if(index == 0) {
 //              CommonFunction.generateCsvFile(tempFileName, tr.toString(true),true);
@@ -113,7 +123,6 @@ public class App {
 //          }
 //          index++;
 //      }
-  }
-              
-   
+    }
+
 }
