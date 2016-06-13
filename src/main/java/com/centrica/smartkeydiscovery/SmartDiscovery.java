@@ -114,5 +114,24 @@ public class SmartDiscovery {
         }
         return listRel;
     }
+    
+    //This prioritizes relationship without additional keyword 
+    //Because we will use stack which will be LIFO (Last In First Out)
+    public List<TableRelationship> reorderRelationshipBasedonAdditionalKeyword(List<TableRelationship> listTRInput) throws Exception {
+        List<TableRelationship> trOutput = new ArrayList<>();
+        //Put relationship without additional keywords first
+        for(int i=0;i<listTRInput.size();i++){
+            if(CommonFunction.stringIsEmpty(listTRInput.get(i).getAdditionalKeywordFound())){
+                trOutput.add(listTRInput.get(i));
+            }
+        }
+        //Put relationship WITH additional keywords later
+        for(int i=0;i<listTRInput.size();i++){
+            if(!CommonFunction.stringIsEmpty(listTRInput.get(i).getAdditionalKeywordFound())){
+                trOutput.add(listTRInput.get(i));
+            }
+        }
+        return trOutput;
+    }
 
 }
