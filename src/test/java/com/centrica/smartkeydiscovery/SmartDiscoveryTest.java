@@ -7,7 +7,7 @@ package com.centrica.smartkeydiscovery;
 
 import com.centrica.commonfunction.CommonFunction;
 import com.centrica.entity.Table;
-import com.centrica.entity.TableRelationship;
+import com.centrica.entity.TableRelationshipDetail;
 import com.centrica.relationshipalgorithm.SchemaKeyAlgorithm;
 import static java.lang.Integer.parseInt;
 import java.util.ArrayList;
@@ -18,6 +18,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import static java.lang.Integer.parseInt;
 
 /**
  *
@@ -69,7 +70,7 @@ public class SmartDiscoveryTest {
     @Test
     public void searchKeywordRelationshipRelCount() throws Exception {
         SmartDiscovery sd = new SmartDiscovery();
-        List<TableRelationship> lst = sd.searchKeywordRelationship("AROUT", tbl);
+        List<TableRelationshipDetail> lst = sd.searchKeywordRelationship("AROUT", tbl);
         
         assertEquals(parseInt(CommonFunction.readProperty("searchlimit")), lst.size());
     }
@@ -77,7 +78,7 @@ public class SmartDiscoveryTest {
     @Test
     public void searchKeywordRelationshipRelRow() throws Exception {
         SmartDiscovery sd = new SmartDiscovery();
-        List<TableRelationship> lst = sd.searchKeywordRelationship("AROUT", tbl);
+        List<TableRelationshipDetail> lst = sd.searchKeywordRelationship("AROUT", tbl);
         
         assertEquals(lst.get(0).tableTo.rows.get(0)[10],"Colchester");
     }
@@ -119,29 +120,29 @@ public class SmartDiscoveryTest {
 
         SmartDiscovery sd = new SmartDiscovery();
         SchemaKeyAlgorithm ska;
-        List<TableRelationship> listRelTable = new ArrayList<>();
+        List<TableRelationshipDetail> listRelTable = new ArrayList<>();
         //First step look for keyword in seeded table     
         tblSeeded = sd.searchKeywordTable(keyword, tblSeeded);
         
         Table tblOrders = new Table("orders");
         tblOrders.loadFromCSV(filesDir + "\\" + "orders.csv");
-        List<TableRelationship> listRelTemp1 = sd.searchTableRelationship(tblSeeded, tblOrders);
+        List<TableRelationshipDetail> listRelTemp1 = sd.searchTableRelationshipDetail(tblSeeded, tblOrders);
         ska = new SchemaKeyAlgorithm(listRelTemp1);
-        TableRelationship relTemp1 = ska.getSingleJoinKey();
+        TableRelationshipDetail relTemp1 = ska.getSingleJoinKey();
         String additionalKeywordTemp = sd.getTableContainsKeywords(additionalKeyword.split(","), relTemp1.tableTo);
         relTemp1.setAdditionalKeywordFound(additionalKeywordTemp);
         
         Table tblSuppliers = new Table("suppliers");
         tblSuppliers.loadFromCSV(filesDir + "\\" + "suppliers.csv");
-        List<TableRelationship> listRelTemp2 = sd.searchTableRelationship(tblSeeded, tblSuppliers);
+        List<TableRelationshipDetail> listRelTemp2 = sd.searchTableRelationshipDetail(tblSeeded, tblSuppliers);
         ska = new SchemaKeyAlgorithm(listRelTemp2);
-        TableRelationship relTemp2 = ska.getSingleJoinKey();
+        TableRelationshipDetail relTemp2 = ska.getSingleJoinKey();
         additionalKeywordTemp = sd.getTableContainsKeywords(additionalKeyword.split(","), relTemp2.tableTo);
         relTemp2.setAdditionalKeywordFound(additionalKeywordTemp);
         
         listRelTable = new ArrayList<>();
         listRelTable.add(relTemp1);listRelTable.add(relTemp2);
-        List<TableRelationship> listRelFINAL = sd.reorderRelationshipBasedonAdditionalKeyword(listRelTable);
+        List<TableRelationshipDetail> listRelFINAL = sd.reorderRelationshipBasedonPriorities(listRelTable);
         
         assertEquals(listRelFINAL.get(0).getTableNameTo(),"suppliers");
         assertEquals(listRelFINAL.get(1).getTableNameTo(),"orders");
@@ -149,8 +150,8 @@ public class SmartDiscoveryTest {
     }
     
     
-     @Test
-    public void searchTableRelationshipTableSize() throws Exception {
+    @Test
+    public void searchTableRelationshipDetailTableSize() throws Exception {
         String keyword = "Blauer see delikatessen";
         String seededTableName = "customers";
         String additionalKeyword = "forsterstr. 57,Mannheim";
@@ -168,21 +169,21 @@ public class SmartDiscoveryTest {
 
         SmartDiscovery sd = new SmartDiscovery();
         SchemaKeyAlgorithm ska;
-        List<TableRelationship> listRelTable = new ArrayList<>();
+        List<TableRelationshipDetail> listRelTable = new ArrayList<>();
         //First step look for keyword in seeded table     
         tblSeeded = sd.searchKeywordTable(keyword, tblSeeded);
         
         Table tblOrders = new Table("orders");
         tblOrders.loadFromCSV(filesDir + "\\" + "orders.csv");
         
-        listRelTable = sd.searchTableRelationship(tblSeeded, tblOrders);
+        listRelTable = sd.searchTableRelationshipDetail(tblSeeded, tblOrders);
         
         System.out.print("dada3");
         assertEquals(parseInt(CommonFunction.readProperty("searchlimit")),listRelTable.get(0).tableTo.rows.size());
     }
     
     @Test
-     public void searchTableRelationshipContent() throws Exception {
+     public void searchTableRelationshipDetailContent() throws Exception {
         String keyword = "Blauer see delikatessen";
         String seededTableName = "customers";
         String additionalKeyword = "forsterstr. 57,Mannheim";
@@ -200,14 +201,14 @@ public class SmartDiscoveryTest {
 
         SmartDiscovery sd = new SmartDiscovery();
         SchemaKeyAlgorithm ska;
-        List<TableRelationship> listRelTable = new ArrayList<>();
+        List<TableRelationshipDetail> listRelTable = new ArrayList<>();
         //First step look for keyword in seeded table     
         tblSeeded = sd.searchKeywordTable(keyword, tblSeeded);
         
         Table tblOrders = new Table("orders");
         tblOrders.loadFromCSV(filesDir + "\\" + "orders.csv");
         
-        listRelTable = sd.searchTableRelationship(tblSeeded, tblOrders);
+        listRelTable = sd.searchTableRelationshipDetail(tblSeeded, tblOrders);
         
         System.out.print("dada3");
         assertEquals("BLAUS",listRelTable.get(0).getKeyword());
@@ -215,5 +216,16 @@ public class SmartDiscoveryTest {
         assertEquals(parseInt(CommonFunction.readProperty("searchlimit")),listRelTable.get(1).tableTo.rows.size());
         assertEquals("Mannheim",listRelTable.get(3).getKeyword());
     }
+     
+     @Test
+    public void searchTableRelationshipDetailKeywordJoinMultipleColumn() throws Exception {
+        Table a = new Table("employee");
+        a.columnName = new String[] {"EmpID","Name","City","Country","WorkLocation"};
+        a.rows.add(new String[] {"1001","Dandy","Jakarta","Indonesia","UK"});
+        a.rows.add(new String[] {"1002","John","London","UK","UK"});
+        a.rows.add(new String[] {"1002","John","London","UK","UK"});
+    
+    }
+    
     
 }

@@ -11,38 +11,33 @@ package com.centrica.entity;
  */
 public class TableRelationship {
 
-    private String keyword;
-    private String tableNameFrom;
-    private String columnNameFrom;
-    private int columnIndexFrom;
-    private String tableNameTo;
-    private String columnNameTo;
-    private int columnIndexTo;
-    private boolean partialRelationship;
-    private String additionalKeywordFound;
-    private String destinationKeywordFound;
+    protected String tableNameFrom;
+    protected String columnNameFrom;
+    protected int columnIndexFrom;
+    protected String tableNameTo;
+    protected String columnNameTo;
+    protected int columnIndexTo;
+    protected String additionalKeywordFound;
+    protected String destinationKeywordFound;
 
-    public Table tableTo;
-
-    public TableRelationship(String keyword, String tableNameTo, String columnNameTo, int columnIndexTo) {
-        this.keyword = keyword;
-        this.tableNameTo = tableNameTo;
-        this.columnNameTo = columnNameTo;
-        this.columnIndexTo = columnIndexTo;
-        this.partialRelationship = true;
-    }
-
-    public TableRelationship(String keyword, String tableNameFrom, String columnNameFrom, int columnIndexFrom,
+    public TableRelationship(String tableNameFrom, String columnNameFrom, int columnIndexFrom,
             String tableNameTo, String columnNameTo, int columnIndexTo) {
 
-        this.keyword = keyword;
         this.tableNameFrom = tableNameFrom;
         this.columnNameFrom = columnNameFrom;
         this.columnIndexFrom = columnIndexFrom;
         this.tableNameTo = tableNameTo;
         this.columnNameTo = columnNameTo;
         this.columnIndexTo = columnIndexTo;
-        this.partialRelationship = false;
+    }
+    
+    public TableRelationship(TableRelationshipDetail trdTEmp){
+        this.tableNameFrom = trdTEmp.tableNameFrom;
+        this.columnNameFrom = trdTEmp.columnNameFrom;
+        this.columnIndexFrom = trdTEmp.columnIndexFrom;
+        this.tableNameTo = trdTEmp.tableNameTo;
+        this.columnNameTo = trdTEmp.columnNameTo;
+        this.columnIndexTo = trdTEmp.columnIndexTo;
     }
 
     public String toString(boolean includeHeader) {
@@ -52,7 +47,6 @@ public class TableRelationship {
         }
 
         str.append(String.format("%s,%s,%s,%s,%s,%s,%s",
-                this.keyword,
                 this.tableNameFrom,
                 this.columnNameFrom,
                 this.columnIndexFrom,
@@ -61,14 +55,6 @@ public class TableRelationship {
                 this.columnIndexTo));
 
         return str.toString();
-    }
-
-    public String getKeyword() {
-        return keyword;
-    }
-
-    public void setKeyword(String keyword) {
-        this.keyword = keyword;
     }
 
     public String getTableNameFrom() {
@@ -117,14 +103,6 @@ public class TableRelationship {
 
     public void setColumnIndexTo(int columnIndexTo) {
         this.columnIndexTo = columnIndexTo;
-    }
-
-    public boolean isPartialRelationship() {
-        return partialRelationship;
-    }
-
-    public void setPartialRelationship(boolean partialRelationship) {
-        this.partialRelationship = partialRelationship;
     }
 
     public String getDestinationKeywordFound() {

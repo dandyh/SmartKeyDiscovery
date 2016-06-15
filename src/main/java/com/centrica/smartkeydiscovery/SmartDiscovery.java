@@ -6,13 +6,15 @@
 package com.centrica.smartkeydiscovery;
 
 import com.centrica.commonfunction.CommonFunction;
-import com.centrica.entity.TableRelationship;
+import com.centrica.entity.TableRelationshipDetail;
 import com.centrica.entity.Table;
+import com.centrica.entity.TableRelationship;
 import java.util.ArrayList;
 import java.util.List;
 import static java.lang.Integer.parseInt;
 import java.util.HashSet;
 import java.util.Set;
+import static java.lang.Integer.parseInt;
 
 /**
  *
@@ -73,9 +75,9 @@ public class SmartDiscovery {
     }
 
     //Search keyword within table and return the relationship object (Which contains indexes and the matching rows)
-    public List<TableRelationship> searchKeywordRelationship(String keyword, Table inputTable) throws Exception {
+    public List<TableRelationshipDetail> searchKeywordRelationship(String keyword, Table inputTable) throws Exception {
         int index = 0;
-        List<TableRelationship> rel = new ArrayList<TableRelationship>();
+        List<TableRelationshipDetail> rel = new ArrayList<TableRelationshipDetail>();
 
         for (int z = 0; z < inputTable.rows.size(); z++) {
 
@@ -86,7 +88,7 @@ public class SmartDiscovery {
 
             for (int i = 0; i < inputTable.columnName.length; i++) {
                 if (CommonFunction.stringEquals(inputTable.rows.get(z)[i], keyword)) {
-                    TableRelationship relPartial = new TableRelationship(keyword, inputTable.getTableName(), inputTable.columnName[i], i);
+                    TableRelationshipDetail relPartial = new TableRelationshipDetail(keyword, inputTable.getTableName(), inputTable.columnName[i], i);
                     relPartial.tableTo = new Table(inputTable.getTableName());
                     relPartial.tableTo.columnName = inputTable.columnName;
                     relPartial.tableTo.rows.add(inputTable.rows.get(z));
@@ -99,12 +101,12 @@ public class SmartDiscovery {
     }
 
     //Search keyword within table and return the relationship list
-    public List<TableRelationship> searchTableRelationship(Table inputTable, Table compareTable) throws Exception {
-        List<TableRelationship> listRel = new ArrayList<>();
+    public List<TableRelationshipDetail> searchTableRelationshipDetail(Table inputTable, Table compareTable) throws Exception {
+        List<TableRelationshipDetail> listRel = new ArrayList<>();
         int rowIndex = 0;
         for (String[] arrayRecord : inputTable.rows) {
             for (int i = 0; i < arrayRecord.length; i++) {
-                List<TableRelationship> listPartialRel = searchKeywordRelationship(arrayRecord[i], compareTable);
+                List<TableRelationshipDetail> listPartialRel = searchKeywordRelationship(arrayRecord[i], compareTable);
                 String columnNameFromTemp = inputTable.columnName[i];
                 if (listPartialRel.size() > 0) {
                     //Combine all the rows together
@@ -112,7 +114,7 @@ public class SmartDiscovery {
                     //Get all "columnto"
                     List<String> listExlcudeColumnTo = new ArrayList<>();
 
-                    for (TableRelationship tempRel : listPartialRel) {
+                    for (TableRelationshipDetail tempRel : listPartialRel) {
                         //Create a combination of relationship tables (To decrease the complexity)
                         if (!listExlcudeColumnTo.contains(tempRel.getColumnNameTo())) {
                             listExlcudeColumnTo.add(tempRel.getColumnNameTo());
@@ -122,7 +124,7 @@ public class SmartDiscovery {
                             tempRel.setPartialRelationship(false);
                             //tempRel.tableTo.columnName = compareTable.columnName;
                             List<String[]> relRows = new ArrayList<>();
-                            for (TableRelationship tblRelTemp : listPartialRel) {
+                            for (TableRelationshipDetail tblRelTemp : listPartialRel) {
                                 if (tempRel.getColumnNameTo() == tblRelTemp.getColumnNameTo()) {
                                     relRows.add(tblRelTemp.tableTo.rows.get(0));
                                 }
@@ -139,14 +141,14 @@ public class SmartDiscovery {
         }
         
         //Combine listRel that has same column from and to
-//        List<TableRelationship> listRelOutput = new ArrayList<>();
+//        List<TableRelationshipDetail> listRelOutput = new ArrayList<>();
 //        List<String> listExlcudeColumnFromTo = new ArrayList<>();
 //        
-//        for (TableRelationship tempRel : listRel) {
+//        for (TableRelationshipDetail tempRel : listRel) {
 //             if (!listExlcudeColumnFromTo.contains(tempRel.getColumnNameTo())) {
 //                listExlcudeColumnFromTo.add(tempRel.getColumnNameFrom()+tempRel.getColumnNameTo());
 //                List<String[]> relRows = new ArrayList<>();
-//                for (TableRelationship tempRelInside : listRel) {
+//                for (TableRelationshipDetail tempRelInside : listRel) {
 //                    if((tempRelInside.getColumnNameFrom()+tempRelInside.getColumnNameTo()).equals(tempRel.getColumnNameFrom()+tempRel.getColumnNameTo())){
 //                        for(String[] tempRow : tempRelInside.tableTo.rows){
 //                            relRows.add(tempRow);
@@ -163,8 +165,8 @@ public class SmartDiscovery {
 
     //This prioritizes relationship without additional keyword 
     //Because we will use stack which will be LIFO (Last In First Out)
-    public List<TableRelationship> reorderRelationshipBasedonAdditionalKeyword(List<TableRelationship> listTRInput) throws Exception {
-        List<TableRelationship> trOutput = new ArrayList<>();
+    public List<TableRelationshipDetail> reorderRelationshipBasedonPriorities(List<TableRelationshipDetail> listTRInput) throws Exception {
+        List<TableRelationshipDetail> trOutput = new ArrayList<>();
         //Put relationship without additional keywords and destination first
         for (int i = 0; i < listTRInput.size(); i++) {
             if (CommonFunction.stringIsEmpty(listTRInput.get(i).getAdditionalKeywordFound())
@@ -188,6 +190,23 @@ public class SmartDiscovery {
         }
 
         return trOutput;
+    }
+    
+    //Convert list of relationship details into relationship (This concatinates all of the data)
+    public List<TableRelationship> convertListRelDetailsIntoListRel(List<TableRelationshipDetail> listTRInput) throws Exception {
+        List<TableRelationship> trOutput = new ArrayList<>();
+        //As a lookup to avoid duplicate
+        List<String> listRelCombination = new ArrayList<>();
+        
+        
+        for(TableRelationshipDetail trdTemp : listTRInput){            
+            if(!listRelCombination.contains(trdTemp.getRelationshipInString())){
+                
+                
+                listRelCombination.add(trdTemp.getRelationshipInString());
+            }
+        }
+       return trOutput;
     }
 
 }

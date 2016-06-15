@@ -7,6 +7,7 @@ package com.centrica.relationshipalgorithm;
 
 import com.centrica.commonfunction.CommonFunction;
 import com.centrica.entity.TableRelationship;
+import com.centrica.entity.TableRelationshipDetail;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,30 +17,29 @@ import java.util.List;
  */
 public class SchemaKeyAlgorithm {
 
-    List<TableRelationship> listTableRelationship;
-    
-    public SchemaKeyAlgorithm(List<TableRelationship> listTableRelationship) {
-        this.listTableRelationship = listTableRelationship;
+    List<TableRelationshipDetail> listTableRelationshipDetail;
+
+    public SchemaKeyAlgorithm(List<TableRelationshipDetail> listTableRelationshipDetail) {
+        this.listTableRelationshipDetail = listTableRelationshipDetail;
     }
-    
-    public TableRelationship getSingleJoinKey(){
-        for(TableRelationship trTemp : listTableRelationship){
-            if(CommonFunction.stringEquals(trTemp.getColumnNameFrom(), trTemp.getColumnNameTo())){
+
+    public TableRelationshipDetail getSingleJoinKey() {
+        for (TableRelationshipDetail trTemp : listTableRelationshipDetail) {
+            if (CommonFunction.stringEquals(trTemp.getColumnNameFrom(), trTemp.getColumnNameTo())) {
                 return trTemp;
             }
         }
         return null;
     }
-    
-    public List<TableRelationship> getMultipleJoinKey(){
-        List<TableRelationship> listTableRel = new ArrayList<>();
-        for(TableRelationship trTemp : listTableRelationship){
-            if(CommonFunction.stringEquals(trTemp.getColumnNameFrom(), trTemp.getColumnNameTo())){
+
+    public List<TableRelationshipDetail> getMultipleJoinKey() {
+        List<TableRelationshipDetail> listTableRel = new ArrayList<>();
+        for (TableRelationshipDetail trTemp : listTableRelationshipDetail) {
+            if (CommonFunction.stringEquals(trTemp.getColumnNameFrom(), trTemp.getColumnNameTo())) {
                 listTableRel.add(trTemp);
             }
         }
         return listTableRel;
     }
-    
-    
+
 }

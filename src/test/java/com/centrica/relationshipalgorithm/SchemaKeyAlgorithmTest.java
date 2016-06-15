@@ -6,7 +6,7 @@
 package com.centrica.relationshipalgorithm;
 
 import com.centrica.entity.Table;
-import com.centrica.entity.TableRelationship;
+import com.centrica.entity.TableRelationshipDetail;
 import com.centrica.smartkeydiscovery.SmartDiscovery;
 import java.util.List;
 import org.junit.After;
@@ -58,7 +58,7 @@ public class SchemaKeyAlgorithmTest {
         
         SmartDiscovery sd = new SmartDiscovery();
         Table tempCustomer = sd.searchKeywordTable("BLAUS", tblCustomers); 
-        List<TableRelationship> temp = sd.searchTableRelationship(tempCustomer, tblOrders);
+        List<TableRelationshipDetail> temp = sd.searchTableRelationshipDetail(tempCustomer, tblOrders);
         SchemaKeyAlgorithm ska = new SchemaKeyAlgorithm(temp);
         assertEquals("CustomerID",ska.getSingleJoinKey().getColumnNameTo());
     }
@@ -68,7 +68,7 @@ public class SchemaKeyAlgorithmTest {
         
         SmartDiscovery sd = new SmartDiscovery();
         Table tempCustomer = sd.searchKeywordTable("BLAUS", tblCustomers); 
-        List<TableRelationship> temp = sd.searchTableRelationship(tempCustomer, tblOrders);
+        List<TableRelationshipDetail> temp = sd.searchTableRelationshipDetail(tempCustomer, tblOrders);
         SchemaKeyAlgorithm ska = new SchemaKeyAlgorithm(temp);
         assertEquals(temp.get(0).tableTo,ska.getSingleJoinKey().tableTo);
     }
