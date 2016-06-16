@@ -5,6 +5,8 @@
  */
 package com.centrica.entity;
 
+import java.util.HashSet;
+
 /**
  *
  * @author dandy
@@ -17,7 +19,8 @@ public class TableRelationship {
     protected String tableNameTo;
     protected String columnNameTo;
     protected int columnIndexTo;
-    protected String additionalKeywordFound;
+    protected HashSet<String> additionalKeywordFound;
+    
     protected String destinationKeywordFound;
 
     public TableRelationship(String tableNameFrom, String columnNameFrom, int columnIndexFrom,
@@ -112,12 +115,13 @@ public class TableRelationship {
     public void setDestinationKeywordFound(String destinationKeywordFound) {
         this.destinationKeywordFound = destinationKeywordFound;
     }
-
-    public String getAdditionalKeywordFound() {
+    
+    public HashSet<String> getAdditionalKeywordFound() {
         return additionalKeywordFound;
     }
 
-    public void setAdditionalKeywordFound(String additionalKeywordFound) {
+    public void setAdditionalKeywordFound(HashSet<String> additionalKeywordFound) {
         this.additionalKeywordFound = additionalKeywordFound;
     }
+  
 }

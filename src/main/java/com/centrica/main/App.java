@@ -22,6 +22,7 @@ import java.util.Stack;
  */
 public class App {
 
+    public static int testing = 1;
     Stack<TableRelationshipDetail> stackTRs = new Stack<>();
 
     public static void main(String[] args) throws Exception {
@@ -35,6 +36,14 @@ public class App {
         String seededTableName = "customers";
         String additionalKeyword = "forsterstr. 57,Mannheim";
         String destination = "meat pie";// "Peacock";//"Carnarvon Tigers";//Meat pie";//"laura"; //"0.15";//"Aniseed Syrup";// "Meat pie";
+        
+        if(testing==0){
+            keyword = "Blauer see delikatessen";
+            seededTableName = "customers";
+            additionalKeyword = "forsterstr. 57,Mannheim";
+            destination = "meat pie";        
+        }
+        
 
         String filesDir = "C:\\Users\\dandy\\OneDrive\\Documents\\NetBeansProjects\\SmartKeyDiscovery\\Data\\northwind-mongo-master";
         String[] fileNames = CommonFunction.getFilenamesInFolder(filesDir);
@@ -116,7 +125,7 @@ public class App {
                             relTemp.setDestinationKeywordFound(destinationKeywordTemp);
                             
                             //Get additional keyword (If exists from the table relationship)
-                            String additionalKeywordTemp = sd.getTableContainsKeywords(additionalKeyword.split(","), relTemp.tableTo);
+                            HashSet<String> additionalKeywordTemp = sd.getTableContainsKeywords(additionalKeyword.split(","), relTemp.tableTo);
                             relTemp.setAdditionalKeywordFound(additionalKeywordTemp);
 
                             listRelTable.add(relTemp);                                                     

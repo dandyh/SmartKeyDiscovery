@@ -48,17 +48,18 @@ public class SmartDiscovery {
     }
 
     //Search additional field within table and return boolean (return TRUE, IF found)
-    public String getTableContainsKeywords(String[] keywords, Table inputTable) throws Exception {
+    public HashSet<String> getTableContainsKeywords(String[] keywords, Table inputTable) throws Exception {
+        HashSet<String> hashOutput = new HashSet<String>();
         for (String[] arrayRecord : inputTable.rows) {
             for (String record : arrayRecord) {
                 for (String keywordTemp : keywords) {
                     if (CommonFunction.getCleanedString(record).contains(CommonFunction.getCleanedString(keywordTemp))) {
-                        return keywordTemp;
+                        hashOutput.add(keywordTemp);
                     }
                 }
             }
         }
-        return null;
+        return hashOutput;
     }
 
     //Search additional field within table and return boolean (return TRUE, IF found)
@@ -149,14 +150,14 @@ public class SmartDiscovery {
         List<TableRelationshipDetail> trOutput = new ArrayList<>();
         //Put relationship without additional keywords and destination first
         for (int i = 0; i < listTRInput.size(); i++) {
-            if (CommonFunction.stringIsEmpty(listTRInput.get(i).getAdditionalKeywordFound())
+            if (listTRInput.get(i).getAdditionalKeywordFound().isEmpty()
                     && CommonFunction.stringIsEmpty(listTRInput.get(i).getDestinationKeywordFound())) {
                 trOutput.add(listTRInput.get(i));
             }
         }
         //Put relationship WITH additional keywords later
         for (int i = 0; i < listTRInput.size(); i++) {
-            if (!CommonFunction.stringIsEmpty(listTRInput.get(i).getAdditionalKeywordFound())
+            if (!listTRInput.get(i).getAdditionalKeywordFound().isEmpty()
                     && CommonFunction.stringIsEmpty(listTRInput.get(i).getDestinationKeywordFound())) {
                 trOutput.add(listTRInput.get(i));
             }

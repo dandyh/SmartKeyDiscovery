@@ -1,0 +1,7 @@
+Next:
+
+1. Save recommendation path (To enhance performance), to be used in the next run
+2. Machine learning, to learn if the join is wrong
+	- Might use a parameter to set the limit of number iteration to be ran
+	- Run the new program based on the mistakes made in the previous sessions (Learn)
+	

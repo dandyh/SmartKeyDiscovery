@@ -19,6 +19,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import static java.lang.Integer.parseInt;
+import java.util.HashSet;
 
 /**
  *
@@ -87,18 +88,18 @@ public class SmartDiscoveryTest {
     public void getTableContainsKeywordsDifferentUpperLowerCase() throws Exception {
         SmartDiscovery sd = new SmartDiscovery();
         String[] strArray = {"ARouT", "Dandy"};
-        String test = sd.getTableContainsKeywords(strArray, tbl);
+        HashSet<String> test = sd.getTableContainsKeywords(strArray, tbl);
         
-        assertEquals(test,"ARouT");
+        assertEquals(test.contains("ARouT"), true);
     }
     
     @Test
     public void isTableContainsKeywordDifferentNotFound() throws Exception {
         SmartDiscovery sd = new SmartDiscovery();
         String[] strArray = {"ARouT123"};
-        String test = sd.getTableContainsKeywords(strArray, tbl);
+        HashSet<String> test = sd.getTableContainsKeywords(strArray, tbl);
         
-        assertEquals(test,null);
+        assertEquals(test.isEmpty(), true);
     }
     
     @Test
@@ -129,7 +130,7 @@ public class SmartDiscoveryTest {
         List<TableRelationshipDetail> listRelTemp1 = sd.searchTableRelationshipDetail(tblSeeded, tblOrders);
         ska = new SchemaKeyAlgorithm(listRelTemp1);
         TableRelationshipDetail relTemp1 = ska.getSingleJoinKey();
-        String additionalKeywordTemp = sd.getTableContainsKeywords(additionalKeyword.split(","), relTemp1.tableTo);
+        HashSet<String> additionalKeywordTemp = sd.getTableContainsKeywords(additionalKeyword.split(","), relTemp1.tableTo);
         relTemp1.setAdditionalKeywordFound(additionalKeywordTemp);
         
         Table tblSuppliers = new Table("suppliers");
