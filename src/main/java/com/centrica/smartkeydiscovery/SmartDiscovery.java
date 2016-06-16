@@ -140,26 +140,6 @@ public class SmartDiscovery {
             }
         }
         
-        //Combine listRel that has same column from and to
-//        List<TableRelationshipDetail> listRelOutput = new ArrayList<>();
-//        List<String> listExlcudeColumnFromTo = new ArrayList<>();
-//        
-//        for (TableRelationshipDetail tempRel : listRel) {
-//             if (!listExlcudeColumnFromTo.contains(tempRel.getColumnNameTo())) {
-//                listExlcudeColumnFromTo.add(tempRel.getColumnNameFrom()+tempRel.getColumnNameTo());
-//                List<String[]> relRows = new ArrayList<>();
-//                for (TableRelationshipDetail tempRelInside : listRel) {
-//                    if((tempRelInside.getColumnNameFrom()+tempRelInside.getColumnNameTo()).equals(tempRel.getColumnNameFrom()+tempRel.getColumnNameTo())){
-//                        for(String[] tempRow : tempRelInside.tableTo.rows){
-//                            relRows.add(tempRow);
-//                        }
-//                    }
-//                }
-//                tempRel.tableTo.rows = relRows;                
-//                listRelOutput.add(tempRel);
-//             }
-//        }
-        
         return listRel;
     }
 
@@ -191,22 +171,4 @@ public class SmartDiscovery {
 
         return trOutput;
     }
-    
-    //Convert list of relationship details into relationship (This concatinates all of the data)
-    public List<TableRelationship> convertListRelDetailsIntoListRel(List<TableRelationshipDetail> listTRInput) throws Exception {
-        List<TableRelationship> trOutput = new ArrayList<>();
-        //As a lookup to avoid duplicate
-        List<String> listRelCombination = new ArrayList<>();
-        
-        
-        for(TableRelationshipDetail trdTemp : listTRInput){            
-            if(!listRelCombination.contains(trdTemp.getRelationshipInString())){
-                
-                
-                listRelCombination.add(trdTemp.getRelationshipInString());
-            }
-        }
-       return trOutput;
-    }
-
 }

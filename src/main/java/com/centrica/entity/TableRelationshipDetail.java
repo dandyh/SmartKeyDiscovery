@@ -5,6 +5,8 @@
  */
 package com.centrica.entity;
 
+import com.centrica.commonfunction.CommonFunction;
+
 /**
  *
  * @author dandy
@@ -43,9 +45,17 @@ public class TableRelationshipDetail extends TableRelationship {
         this.partialRelationship = partialRelationship;
     }
     
-    public String getRelationshipInString(){
-        String separator = "_";
-        return this.tableNameFrom + separator + this.columnNameFrom + separator +
-                this.tableNameTo + separator + this.columnNameTo;
-    }
+    public String getRelationshipInString(boolean includeKeyoword){
+        String separator = ",";
+        if(!includeKeyoword){
+            return this.tableNameFrom + separator + this.tableNameTo + separator + 
+                    this.columnNameFrom + separator + this.columnNameTo;
+        }else{
+            return this.tableNameFrom + separator + this.tableNameTo + separator + this.keyword + separator + 
+                    this.columnNameFrom + separator + this.columnNameTo + separator + 
+                    CommonFunction.getString(this.additionalKeywordFound) +
+                    separator + CommonFunction.getString(this.destinationKeywordFound);
+        }
+        
+    }        
 }

@@ -18,6 +18,11 @@ import java.util.Properties;
  */
 public class CommonFunction {
 
+    public static String getString(String a){
+        if(a==null) return "";
+        return a.trim();
+    }
+    
     public static boolean stringIsEmpty(String a) {
         if(a == null) return true;
         return a.trim().isEmpty();
