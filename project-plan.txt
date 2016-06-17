@@ -1,7 +1,27 @@
 Next:
 
 1. Save recommendation path (To enhance performance), to be used in the next run
-2. Machine learning, to learn if the join is wrong
+2. Machine learning, to learn if the join is wrong, and update the list of wrong table relationship
 	- Might use a parameter to set the limit of number iteration to be ran
 	- Run the new program based on the mistakes made in the previous sessions (Learn)
 	
+
+	
+Limitation:
+
+
+
+Problems encountered during the dev.
+
+
+1. Algorithm return multiple tablerelationship which causing problem in stack
+
+	-Solution: 
+	1. To still consider a table that already have been used. (Make a mark for relationship that has it). Put exception list table for relationship
+
+	1. To only output 1 tablerelationship when the rel have the same col from and col to (So concatinate it, instead separate it) -- > Cannot use this solution, because it will break the keyword algorithm in the next step
+
+2. If a table is wrongly joined with other table, then that table is no longer can be used for other iteration	
+
+	-Solution:
+	1. Make a list of known wrong join

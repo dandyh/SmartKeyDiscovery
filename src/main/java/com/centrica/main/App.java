@@ -7,6 +7,7 @@ package com.centrica.main;
 
 import com.centrica.commonfunction.CommonFunction;
 import com.centrica.entity.Table;
+import com.centrica.entity.TableRelationship;
 import com.centrica.entity.TableRelationshipDetail;
 import com.centrica.relationshipalgorithm.SchemaKeyAlgorithm;
 import com.centrica.smartkeydiscovery.SmartDiscovery;
@@ -22,30 +23,35 @@ import java.util.Stack;
  */
 public class App {
 
-    public static int testing = 1;
+    public static int testing = 0;
     Stack<TableRelationshipDetail> stackTRs = new Stack<>();
 
     public static void main(String[] args) throws Exception {
         boolean isDestinationFound = false;
         List<String> allTableRelationship = new ArrayList<>();              
-        
+        List<TableRelationship> listTRException = new ArrayList<>();
         HashSet<String> hashUsedTablenames = new HashSet<String>();
         HashSet<String> hashSeeded = new HashSet<String>();
+        SmartDiscovery sd = new SmartDiscovery();
         
         String keyword = "Blauer see delikatessen";
         String seededTableName = "customers";
         String additionalKeyword = "forsterstr. 57,Mannheim";
         String destination = "meat pie";// "Peacock";//"Carnarvon Tigers";//Meat pie";//"laura"; //"0.15";//"Aniseed Syrup";// "Meat pie";
         
-        if(testing==0){
-            keyword = "Blauer see delikatessen";
-            seededTableName = "customers";
+        if(testing==1){
+            keyword = "meat pie";
+            seededTableName = "products";
             additionalKeyword = "forsterstr. 57,Mannheim";
-            destination = "meat pie";        
+            destination = "Romero";        
         }
         
-
-        String filesDir = "C:\\Users\\dandy\\OneDrive\\Documents\\NetBeansProjects\\SmartKeyDiscovery\\Data\\northwind-mongo-master";
+        //Load exception TableRelationship exception
+        //type here, code here
+        String filesDir = CommonFunction.readProperty("relationshipexceptionfile");
+        listTRException = sd.loadListTRException(filesDir);
+        
+        filesDir = "C:\\Users\\dandy\\OneDrive\\Documents\\NetBeansProjects\\SmartKeyDiscovery\\Data\\northwind-mongo-master";
         String[] fileNames = CommonFunction.getFilenamesInFolder(filesDir);
 
         Table tblSeeded = new Table(seededTableName);
@@ -66,7 +72,6 @@ public class App {
 
         Stack<TableRelationshipDetail> stackTableRel = new Stack<>();
         while (tblSeeded != null) {            
-            SmartDiscovery sd = new SmartDiscovery();
             SchemaKeyAlgorithm ska;
             List<TableRelationshipDetail> listRelTable = new ArrayList<>();
             //First step look for keyword in seeded table     
@@ -111,7 +116,8 @@ public class App {
                     String fileLocationTemp = filesDir + "\\" + tempTable;
                     Table temp = new Table(tempTableName);
                     temp.loadFromCSV(fileLocationTemp);
-                    List<TableRelationshipDetail> listRelTemp = sd.searchTableRelationshipDetail(tblSeeded, temp);
+                    List<TableRelationshipDetail> listRelTemp = sd.searchTableRelationshipDetail(tblSeeded, temp,
+                            listTRException);
 
                     if (!listRelTemp.isEmpty()) {
                         //Implement the ALGORITHM
@@ -184,7 +190,7 @@ public class App {
         for(String temp : allTableRelationship){
             sbTableRel.append(temp + "\n");
         }
-        CommonFunction.generateFile("rel-output_1.1.csv", sbTableRel.toString(), false);
+        CommonFunction.generateFile("output/rel-output_1.1.csv", sbTableRel.toString(), false);
         System.out.print("Done\n");
         if (isDestinationFound) {
             System.out.println("Destination found!!!!!!!!!!!");

@@ -8,6 +8,12 @@ package com.centrica.smartkeydiscovery;
 import com.centrica.commonfunction.CommonFunction;
 import com.centrica.entity.TableRelationshipDetail;
 import com.centrica.entity.Table;
+import com.centrica.entity.TableRelationship;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashSet;
@@ -73,25 +79,33 @@ public class SmartDiscovery {
     }
 
     //Search keyword within table and return the relationship object (Which contains indexes and the matching rows)
-    public List<TableRelationshipDetail> searchKeywordRelationship(String keyword, Table inputTable) throws Exception {
+    public List<TableRelationshipDetail> searchKeywordRelationship(String keyword, String tableFromName, String columnFromName, Table inputTable,
+            List<TableRelationship> listTRException) throws Exception {
         int index = 0;
         List<TableRelationshipDetail> rel = new ArrayList<TableRelationshipDetail>();
 
-        for (int z = 0; z < inputTable.rows.size(); z++) {
+        for (int i = 0; i < inputTable.columnName.length; i++) {
 
-            //Exit loop if number of search is exceed the search limit
-            if (index >= parseInt(CommonFunction.readProperty("searchlimit"))) {
-                break;
-            }
+            //Skip Relationship checking if it is on the black listed relationship
+            if (!this.isRelationshipBlackListed(listTRException, tableFromName, columnFromName,
+                    inputTable.getTableName(), inputTable.columnName[i])) {                
+                for (int z = 0; z < inputTable.rows.size(); z++) {
 
-            for (int i = 0; i < inputTable.columnName.length; i++) {
-                if (CommonFunction.stringEquals(inputTable.rows.get(z)[i], keyword)) {
-                    TableRelationshipDetail relPartial = new TableRelationshipDetail(keyword, inputTable.getTableName(), inputTable.columnName[i], i);
-                    relPartial.tableTo = new Table(inputTable.getTableName());
-                    relPartial.tableTo.columnName = inputTable.columnName;
-                    relPartial.tableTo.rows.add(inputTable.rows.get(z));
-                    rel.add(relPartial);
-                    index++;
+                    //Exit loop if number of search is exceed the search limit
+                    if (index >= parseInt(CommonFunction.readProperty("searchlimit"))) {
+                        return rel;
+                    }
+
+                    if (CommonFunction.stringEquals(inputTable.rows.get(z)[i], keyword)) {
+                        TableRelationshipDetail relPartial = new TableRelationshipDetail(keyword, inputTable.getTableName(), inputTable.columnName[i], i);
+                        relPartial.tableTo = new Table(inputTable.getTableName());
+                        relPartial.tableTo.columnName = inputTable.columnName;
+                        relPartial.tableTo.rows.add(inputTable.rows.get(z));
+                        rel.add(relPartial);
+                        index++;
+                    }
+                    System.out.print(tableFromName + ": " + columnFromName + " -> " + inputTable.getTableName() + ": " + inputTable.columnName[i] + "\n");
+
                 }
             }
         }
@@ -99,12 +113,18 @@ public class SmartDiscovery {
     }
 
     //Search keyword within table and return the relationship list
-    public List<TableRelationshipDetail> searchTableRelationshipDetail(Table inputTable, Table compareTable) throws Exception {
-        List<TableRelationshipDetail> listRel = new ArrayList<>();
+    //It should be able to read exception relationship
+    public List<TableRelationshipDetail> searchTableRelationshipDetail(Table inputTable, Table compareTable,
+            List<TableRelationship> listTRException) throws Exception {
+        List<TableRelationshipDetail> listRelOutput = new ArrayList<>();
         int rowIndex = 0;
+        //Loop for rows
         for (String[] arrayRecord : inputTable.rows) {
+            //Loop for columns
             for (int i = 0; i < arrayRecord.length; i++) {
-                List<TableRelationshipDetail> listPartialRel = searchKeywordRelationship(arrayRecord[i], compareTable);
+
+                List<TableRelationshipDetail> listPartialRel = searchKeywordRelationship(arrayRecord[i], inputTable.getTableName(), inputTable.columnName[i],
+                        compareTable, listTRException);
                 String columnNameFromTemp = inputTable.columnName[i];
                 if (listPartialRel.size() > 0) {
                     //Combine all the rows together
@@ -129,7 +149,7 @@ public class SmartDiscovery {
                             }
                             tempRel.tableTo.rows = relRows;
 
-                            listRel.add(tempRel);
+                            listRelOutput.add(tempRel);
                         }
 
                     }
@@ -137,8 +157,8 @@ public class SmartDiscovery {
                 }
             }
         }
-        
-        return listRel;
+
+        return listRelOutput;
     }
 
     //This prioritizes relationship without additional keyword 
@@ -168,5 +188,65 @@ public class SmartDiscovery {
         }
 
         return trOutput;
+    }
+
+    //Check whether the relationship is blacklisted
+    public boolean isRelationshipBlackListed(List<TableRelationship> listTRException,
+            String tableNameFrom, String columnNameFrom,
+            String tableNameTo, String columnNameTo) {
+        if (listTRException.isEmpty()) {
+            return false;
+        }
+        for (TableRelationship trTemp : listTRException) {
+            if (CommonFunction.stringEquals(trTemp.getTableNameFrom(), tableNameFrom)
+                    && CommonFunction.stringEquals(trTemp.getColumnNameFrom(), columnNameFrom)
+                    && CommonFunction.stringEquals(trTemp.getTableNameTo(), tableNameTo)
+                    && CommonFunction.stringEquals(trTemp.getColumnNameTo(), columnNameTo)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public List<TableRelationship> loadListTRException(String fileLocation) throws Exception {
+        List<TableRelationship> listTRException = new ArrayList<>();
+        //Check if file exists
+        File f = new File(fileLocation);
+
+        if (!f.exists() || f.isDirectory()) {
+            return listTRException;
+        }
+
+        //From,To,ColumnFrom,ColumnTo
+        String[] columnName;
+        BufferedReader br = null;
+        String line = "";
+        String csvSplitBy = ",";
+        boolean isHeader = true;
+        try {
+            br = new BufferedReader(new FileReader(fileLocation));
+            while ((line = br.readLine()) != null) {
+                String[] temp = line.split(csvSplitBy);
+                if (isHeader) {
+                    columnName = temp;
+                    isHeader = false;
+                } else {
+                    listTRException.add(new TableRelationship(temp[0], temp[2], -1, temp[1], temp[3], -1));
+                }
+            }
+        } catch (IOException e) {
+            throw (new Exception("IO Exception"));
+        } catch (Exception e) {
+            throw (new Exception(e));
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    throw (new Exception("IO Exception"));
+                }
+            }
+        }
+        return listTRException;
     }
 }

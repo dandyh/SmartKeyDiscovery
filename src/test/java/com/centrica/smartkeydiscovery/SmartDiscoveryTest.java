@@ -7,6 +7,7 @@ package com.centrica.smartkeydiscovery;
 
 import com.centrica.commonfunction.CommonFunction;
 import com.centrica.entity.Table;
+import com.centrica.entity.TableRelationship;
 import com.centrica.entity.TableRelationshipDetail;
 import com.centrica.relationshipalgorithm.SchemaKeyAlgorithm;
 import static java.lang.Integer.parseInt;
@@ -71,7 +72,7 @@ public class SmartDiscoveryTest {
     @Test
     public void searchKeywordRelationshipRelCount() throws Exception {
         SmartDiscovery sd = new SmartDiscovery();
-        List<TableRelationshipDetail> lst = sd.searchKeywordRelationship("AROUT", tbl);
+        List<TableRelationshipDetail> lst = sd.searchKeywordRelationship("AROUT","Customer", "CustomerID", tbl, new ArrayList<>());
         
         assertEquals(parseInt(CommonFunction.readProperty("searchlimit")), lst.size());
     }
@@ -79,9 +80,16 @@ public class SmartDiscoveryTest {
     @Test
     public void searchKeywordRelationshipRelRow() throws Exception {
         SmartDiscovery sd = new SmartDiscovery();
-        List<TableRelationshipDetail> lst = sd.searchKeywordRelationship("AROUT", tbl);
+        List<TableRelationshipDetail> lst = sd.searchKeywordRelationship("AROUT","Customer", "CustomerID", tbl, new ArrayList<>());
         
         assertEquals(lst.get(0).tableTo.rows.get(0)[10],"Colchester");
+    }
+    
+    @Test
+    public void searchKeywordTableNotContains() throws Exception {
+        SmartDiscovery sd = new SmartDiscovery();
+        Table temp = sd.searchKeywordTable("ARO", tbl);
+        assertEquals(0, temp.rows.size());
     }
     
     @Test
@@ -124,10 +132,11 @@ public class SmartDiscoveryTest {
         List<TableRelationshipDetail> listRelTable = new ArrayList<>();
         //First step look for keyword in seeded table     
         tblSeeded = sd.searchKeywordTable(keyword, tblSeeded);
+        List<TableRelationship> listTRException = new ArrayList<TableRelationship>();
         
         Table tblOrders = new Table("orders");
         tblOrders.loadFromCSV(filesDir + "\\" + "orders.csv");
-        List<TableRelationshipDetail> listRelTemp1 = sd.searchTableRelationshipDetail(tblSeeded, tblOrders);
+        List<TableRelationshipDetail> listRelTemp1 = sd.searchTableRelationshipDetail(tblSeeded, tblOrders,listTRException);
         ska = new SchemaKeyAlgorithm(listRelTemp1);
         TableRelationshipDetail relTemp1 = ska.getSingleJoinKey();
         HashSet<String> additionalKeywordTemp = sd.getTableContainsKeywords(additionalKeyword.split(","), relTemp1.tableTo);
@@ -135,7 +144,7 @@ public class SmartDiscoveryTest {
         
         Table tblSuppliers = new Table("suppliers");
         tblSuppliers.loadFromCSV(filesDir + "\\" + "suppliers.csv");
-        List<TableRelationshipDetail> listRelTemp2 = sd.searchTableRelationshipDetail(tblSeeded, tblSuppliers);
+        List<TableRelationshipDetail> listRelTemp2 = sd.searchTableRelationshipDetail(tblSeeded, tblSuppliers,listTRException);
         ska = new SchemaKeyAlgorithm(listRelTemp2);
         TableRelationshipDetail relTemp2 = ska.getSingleJoinKey();
         additionalKeywordTemp = sd.getTableContainsKeywords(additionalKeyword.split(","), relTemp2.tableTo);
@@ -150,6 +159,40 @@ public class SmartDiscoveryTest {
         
     }
     
+    @Test
+    public void searchTableRelationshipException() throws Exception {
+        String keyword = "Blauer see delikatessen";
+        String seededTableName = "customers";
+        String additionalKeyword = "forsterstr. 57,Mannheim";
+        
+        String filesDir = "C:\\Users\\dandy\\OneDrive\\Documents\\NetBeansProjects\\SmartKeyDiscovery\\Data\\northwind-mongo-master";
+        String[] fileNames = CommonFunction.getFilenamesInFolder(filesDir);
+
+        //Look for seeded table
+        Table tblSeeded = new Table(seededTableName);
+        for (String tempTable : fileNames) {
+            if (CommonFunction.stringContains(tempTable, seededTableName)) {
+                tblSeeded.loadFromCSV(filesDir + "\\" + tempTable);
+            }
+        }
+
+        SmartDiscovery sd = new SmartDiscovery();
+        SchemaKeyAlgorithm ska;
+        List<TableRelationshipDetail> listRelTable = new ArrayList<>();
+        //First step look for keyword in seeded table     
+        tblSeeded = sd.searchKeywordTable(keyword, tblSeeded);
+        List<TableRelationship> listTRException = new ArrayList<TableRelationship>();
+        listTRException.add(new TableRelationship(
+                "customers","ContactTitle",0,
+                "suppliers","ContactTitle",0
+        ));
+        
+        Table tblOrders = new Table("suppliers");
+        tblOrders.loadFromCSV(filesDir + "\\" + "suppliers.csv");
+        List<TableRelationshipDetail> listRelTemp1 = sd.searchTableRelationshipDetail(tblSeeded, tblOrders,listTRException);
+        assertEquals(listRelTemp1.get(0).getColumnNameFrom(),"Country");
+        assertEquals(listRelTemp1.size(),1);
+    }
     
     @Test
     public void searchTableRelationshipDetailTableSize() throws Exception {
@@ -177,7 +220,7 @@ public class SmartDiscoveryTest {
         Table tblOrders = new Table("orders");
         tblOrders.loadFromCSV(filesDir + "\\" + "orders.csv");
         
-        listRelTable = sd.searchTableRelationshipDetail(tblSeeded, tblOrders);
+        listRelTable = sd.searchTableRelationshipDetail(tblSeeded, tblOrders,new ArrayList<TableRelationship>());
         
         System.out.print("dada3");
         assertEquals(parseInt(CommonFunction.readProperty("searchlimit")),listRelTable.get(0).tableTo.rows.size());
@@ -209,7 +252,7 @@ public class SmartDiscoveryTest {
         Table tblOrders = new Table("orders");
         tblOrders.loadFromCSV(filesDir + "\\" + "orders.csv");
         
-        listRelTable = sd.searchTableRelationshipDetail(tblSeeded, tblOrders);
+        listRelTable = sd.searchTableRelationshipDetail(tblSeeded, tblOrders, new ArrayList<TableRelationship>());
         
         System.out.print("dada3");
         assertEquals("BLAUS",listRelTable.get(0).getKeyword());

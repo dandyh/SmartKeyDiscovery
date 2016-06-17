@@ -1,5 +1,5 @@
 From,To,Keyword,ColumnFrom,ColumnTo,AdditionalKeyword,DestinationKeyword
-customers,orders,BLAUS,CustomerID,CustomerID,Mannheim,
+customers,orders,BLAUS,CustomerID,CustomerID,forsterstr. 57;Mannheim,
 customers,suppliers,Sales Representative,ContactTitle,ContactTitle,,
 customers,suppliers,Germany,Country,Country,,
 orders,employee-territories,9,EmployeeID,EmployeeID,,
