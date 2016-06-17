@@ -8,12 +8,9 @@ package com.centrica.smartkeydiscovery;
 import com.centrica.commonfunction.CommonFunction;
 import com.centrica.entity.TableRelationshipDetail;
 import com.centrica.entity.Table;
-import com.centrica.entity.TableRelationship;
 import java.util.ArrayList;
 import java.util.List;
-import static java.lang.Integer.parseInt;
 import java.util.HashSet;
-import java.util.Set;
 import static java.lang.Integer.parseInt;
 
 /**
