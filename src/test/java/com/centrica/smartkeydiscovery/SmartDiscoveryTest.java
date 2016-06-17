@@ -72,7 +72,7 @@ public class SmartDiscoveryTest {
     @Test
     public void searchKeywordRelationshipRelCount() throws Exception {
         SmartDiscovery sd = new SmartDiscovery();
-        List<TableRelationshipDetail> lst = sd.searchKeywordRelationship("AROUT","Customer", "CustomerID", tbl, new ArrayList<>());
+        List<TableRelationshipDetail> lst = sd.searchKeywordRelationship("AROUT","Customer", "CustomerID", tbl, new ArrayList<>(), false);
         
         assertEquals(parseInt(CommonFunction.readProperty("searchlimit")), lst.size());
     }
@@ -80,7 +80,23 @@ public class SmartDiscoveryTest {
     @Test
     public void searchKeywordRelationshipRelRow() throws Exception {
         SmartDiscovery sd = new SmartDiscovery();
-        List<TableRelationshipDetail> lst = sd.searchKeywordRelationship("AROUT","Customer", "CustomerID", tbl, new ArrayList<>());
+        List<TableRelationshipDetail> lst = sd.searchKeywordRelationship("AROUT","Customer", "CustomerID", tbl, new ArrayList<>(), false);
+        
+        assertEquals(lst.get(0).tableTo.rows.get(0)[10],"Colchester");
+    }
+    
+    @Test
+    public void searchKeywordRelationshipRelCountByColumnSearch() throws Exception {
+        SmartDiscovery sd = new SmartDiscovery();
+        List<TableRelationshipDetail> lst = sd.searchKeywordRelationship("AROUT","Customer", "CustomerID", tbl, new ArrayList<>(), true);
+        
+        assertEquals(parseInt(CommonFunction.readProperty("searchlimit")), lst.size());
+    }
+    
+    @Test
+    public void searchKeywordRelationshipRelRowByColumnSearch() throws Exception {
+        SmartDiscovery sd = new SmartDiscovery();
+        List<TableRelationshipDetail> lst = sd.searchKeywordRelationship("AROUT","Customer", "CustomerID", tbl, new ArrayList<>(), true);
         
         assertEquals(lst.get(0).tableTo.rows.get(0)[10],"Colchester");
     }

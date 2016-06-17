@@ -79,21 +79,50 @@ public class SmartDiscovery {
     }
 
     //Search keyword within table and return the relationship object (Which contains indexes and the matching rows)
+    //is by column means search each keyword column by column else row by row
     public List<TableRelationshipDetail> searchKeywordRelationship(String keyword, String tableFromName, String columnFromName, Table inputTable,
-            List<TableRelationship> listTRException) throws Exception {
+            List<TableRelationship> listTRException, boolean isByColumn) throws Exception {
         int index = 0;
         List<TableRelationshipDetail> rel = new ArrayList<TableRelationshipDetail>();
 
-        for (int i = 0; i < inputTable.columnName.length; i++) {
+        if(isByColumn){
+            for (int i = 0; i < inputTable.columnName.length; i++) {
 
-            //Skip Relationship checking if it is on the black listed relationship
-            if (!this.isRelationshipBlackListed(listTRException, tableFromName, columnFromName,
-                    inputTable.getTableName(), inputTable.columnName[i])) {                
-                for (int z = 0; z < inputTable.rows.size(); z++) {
+                //Skip Relationship checking if it is on the black listed relationship
+                if (!this.isRelationshipBlackListed(listTRException, tableFromName, columnFromName,
+                        inputTable.getTableName(), inputTable.columnName[i])) {
+                    for (int z = 0; z < inputTable.rows.size(); z++) {
 
+                        //Exit loop if number of search is exceed the search limit
+                        if (index >= parseInt(CommonFunction.readProperty("searchlimit"))) {
+                            return rel;
+                        }
+
+                        if (CommonFunction.stringEquals(inputTable.rows.get(z)[i], keyword)) {
+                            TableRelationshipDetail relPartial = new TableRelationshipDetail(keyword, inputTable.getTableName(), inputTable.columnName[i], i);
+                            relPartial.tableTo = new Table(inputTable.getTableName());
+                            relPartial.tableTo.columnName = inputTable.columnName;
+                            relPartial.tableTo.rows.add(inputTable.rows.get(z));
+                            rel.add(relPartial);
+                            index++;
+                        }
+                        System.out.print(tableFromName + ": " + columnFromName + " -> " + inputTable.getTableName() + ": " + inputTable.columnName[i] + "\n");
+
+                    }
+                }
+            }
+        }else {//Skip Relationship checking if it is on the black listed relationship
+
+            for (int z = 0; z < inputTable.rows.size(); z++) {
+                for (int i = 0; i < inputTable.columnName.length; i++) {
                     //Exit loop if number of search is exceed the search limit
                     if (index >= parseInt(CommonFunction.readProperty("searchlimit"))) {
                         return rel;
+                    }
+
+                    if (this.isRelationshipBlackListed(listTRException, tableFromName, columnFromName,
+                            inputTable.getTableName(), inputTable.columnName[i])) {
+                        break;
                     }
 
                     if (CommonFunction.stringEquals(inputTable.rows.get(z)[i], keyword)) {
@@ -104,9 +133,10 @@ public class SmartDiscovery {
                         rel.add(relPartial);
                         index++;
                     }
-                    System.out.print(tableFromName + ": " + columnFromName + " -> " + inputTable.getTableName() + ": " + inputTable.columnName[i] + "\n");
+                    //System.out.print(tableFromName + ": " + columnFromName + " -> " + inputTable.getTableName() + ": " + inputTable.columnName[i] + "\n");
 
                 }
+
             }
         }
         return rel;
@@ -124,7 +154,7 @@ public class SmartDiscovery {
             for (int i = 0; i < arrayRecord.length; i++) {
 
                 List<TableRelationshipDetail> listPartialRel = searchKeywordRelationship(arrayRecord[i], inputTable.getTableName(), inputTable.columnName[i],
-                        compareTable, listTRException);
+                        compareTable, listTRException, Boolean.parseBoolean(CommonFunction.readProperty("searchrelationshipbycolumn")));
                 String columnNameFromTemp = inputTable.columnName[i];
                 if (listPartialRel.size() > 0) {
                     //Combine all the rows together
@@ -163,27 +193,41 @@ public class SmartDiscovery {
 
     //This prioritizes relationship without additional keyword 
     //Because we will use stack which will be LIFO (Last In First Out)
+    //Also remove duplicate
     public List<TableRelationshipDetail> reorderRelationshipBasedonPriorities(List<TableRelationshipDetail> listTRInput) throws Exception {
+        //To remove duplicate
+        List<String> listComparator = new ArrayList<>();
+        
         List<TableRelationshipDetail> trOutput = new ArrayList<>();
-        //Put relationship without additional keywords and destination first
+        //Put relationship without additional keywords and destination first (at the bottom)
         for (int i = 0; i < listTRInput.size(); i++) {
             if (listTRInput.get(i).getAdditionalKeywordFound().isEmpty()
                     && CommonFunction.stringIsEmpty(listTRInput.get(i).getDestinationKeywordFound())) {
-                trOutput.add(listTRInput.get(i));
+                
+                if(!listComparator.contains(listTRInput.get(i).getRelationshipInString(true))){
+                    trOutput.add(listTRInput.get(i));
+                    listComparator.add(listTRInput.get(i).getRelationshipInString(true));
+                }
             }
         }
-        //Put relationship WITH additional keywords later
+        //Put relationship WITH additional keywords later (in the middle)
         for (int i = 0; i < listTRInput.size(); i++) {
             if (!listTRInput.get(i).getAdditionalKeywordFound().isEmpty()
-                    && CommonFunction.stringIsEmpty(listTRInput.get(i).getDestinationKeywordFound())) {
-                trOutput.add(listTRInput.get(i));
+                    && CommonFunction.stringIsEmpty(listTRInput.get(i).getDestinationKeywordFound())) {                
+                if(!listComparator.contains(listTRInput.get(i).getRelationshipInString(true))){
+                    trOutput.add(listTRInput.get(i));
+                    listComparator.add(listTRInput.get(i).getRelationshipInString(true));
+                }
             }
         }
 
-        //Put destination Table at the last
+        //Put destination Table at the last (On top)
         for (int i = 0; i < listTRInput.size(); i++) {
             if (!CommonFunction.stringIsEmpty(listTRInput.get(i).getDestinationKeywordFound())) {
-                trOutput.add(listTRInput.get(i));
+                if(!listComparator.contains(listTRInput.get(i).getRelationshipInString(true))){
+                    trOutput.add(listTRInput.get(i));
+                    listComparator.add(listTRInput.get(i).getRelationshipInString(true));
+                }
             }
         }
 

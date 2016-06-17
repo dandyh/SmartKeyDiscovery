@@ -23,7 +23,7 @@ import java.util.Stack;
  */
 public class App {
 
-    public static int testing = 0;
+    public static int testing = 1;
     Stack<TableRelationshipDetail> stackTRs = new Stack<>();
 
     public static void main(String[] args) throws Exception {
@@ -159,7 +159,7 @@ public class App {
 
             System.out.print("Step 2 - Look for possible relationship with other tables - Done\n");
 
-            //Step 3 - Put relationships into stack with priority of table that have additional keyword
+            //Step 3 - Put relationships into stack with priority of table that have additional keyword and also remove duplicate
             if (!listRelTable.isEmpty()) {
                 listRelTable = sd.reorderRelationshipBasedonPriorities(listRelTable);
                 for (TableRelationshipDetail relTemp : listRelTable) {
