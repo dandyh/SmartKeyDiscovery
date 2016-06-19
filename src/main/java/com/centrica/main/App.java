@@ -240,7 +240,7 @@ public class App {
         while(it.hasNext()){
             sbTableRel.append(it.next().toString() + "\n");
         }
-        CommonFunction.generateFile("output/table-relationships.csv", sbTableRel.toString(), false);
+        CommonFunction.generateFile("output/table-relationship-summary.csv", sbTableRel.toString(), false);
         
         System.out.print("Done\n");
         if (isDestinationFound) {

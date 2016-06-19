@@ -1,0 +1,13 @@
+From,To,ColumnFrom,ColumnTo
+products,categories,CategoryID,CategoryID
+products,order-details,ProductID,ProductID
+products,order-details,UnitPrice,UnitPrice
+products,suppliers,SupplierID,SupplierID
+order-details,orders,OrderID,OrderID
+orders,customers,CustomerID,CustomerID
+orders,employee-territories,EmployeeID,EmployeeID
+orders,employees,EmployeeID,EmployeeID
+orders,shippers,ShipperID,ShipperID
+employee-territories,territories,TerritoryID,TerritoryID
+territories,regions,RegionID,RegionID
+

@@ -46,16 +46,17 @@ public class TableRelationship {
     public String toString(boolean includeHeader) {
         StringBuffer str = new StringBuffer();
         if (includeHeader) {
-            str.append("keyword,tableNameFrom,columnNameFrom,columnIndexFrom,tableNameTo,columnNameTo,columnIndexTo\n");
+            str.append("From,To,ColumnFrom,ColumnTo\n");
         }
 
-        str.append(String.format("%s,%s,%s,%s,%s,%s,%s",
+        str.append(String.format("%s,%s,%s,%s",
                 this.tableNameFrom,
-                this.columnNameFrom,
-                this.columnIndexFrom,
                 this.tableNameTo,
-                this.columnNameTo,
-                this.columnIndexTo));
+                this.columnNameFrom,
+                this.columnNameTo                   
+                //this.columnIndexFrom,
+                //this.columnIndexTo
+                ));
 
         return str.toString();
     }
