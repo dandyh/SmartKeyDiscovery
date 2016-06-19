@@ -14,6 +14,8 @@ import com.centrica.smartkeydiscovery.SmartDiscovery;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Stack;
 
@@ -27,8 +29,8 @@ public class App {
     Stack<TableRelationshipDetail> stackTRs = new Stack<>();
 
     public static void main(String[] args) throws Exception {
-        boolean isDestinationFound = false;
-        List<String> allTableRelationship = new ArrayList<>();              
+        boolean isDestinationFound = false;        
+        List<String> listTRComparison = new ArrayList<>();
         List<TableRelationship> listTRException = new ArrayList<>();
         HashSet<String> hashUsedTablenames = new HashSet<String>();
         HashSet<String> hashSeeded = new HashSet<String>();
@@ -168,13 +170,13 @@ public class App {
                             relTemp.setAdditionalKeywordFound(additionalKeywordTemp);
 
                             //Only add relationship, if it is not yet exists before
-                            if (!sd.isRelationshipdetailsExists(relTemp.getRelationshipInString(true), allTableRelationship)) {
+                            if (!sd.isRelationshipdetailsExists(relTemp.getRelationshipInString(true), listTRComparison)) {
                                 listRelTable.add(relTemp);
 
                                 hashUsedTablenames.add(relTemp.getTableNameTo());
                                 hashSeeded.add(tblSeeded.getTableName() + "," + relTemp.getTableNameTo());
-
-                                allTableRelationship.add(relTemp.getRelationshipInString(true));
+                                                                
+                                listTRComparison.add(relTemp.getRelationshipInString(true));
 
                                 //If destination is found
                                 if (destinationKeywordTemp != null) {
@@ -184,7 +186,7 @@ public class App {
 
                                 if (relTemp.getColumnNameTo().equals("RegionID")) {
                                     System.out.print("");
-                                }
+                                }                               
                             }
 
                         }
@@ -224,10 +226,22 @@ public class App {
 
         }
         StringBuilder sbTableRel = new StringBuilder("From,To,Keyword,ColumnFrom,ColumnTo,AdditionalKeyword,DestinationKeyword\n");
-        for(String temp : allTableRelationship){
-            sbTableRel.append(temp + "\n");
+        LinkedHashSet linkHashTempRelationships = new LinkedHashSet();
+        for(String temp : listTRComparison){
+            sbTableRel.append(temp.toString() + "\n");
+            String[] aTemp = temp.split(",");
+            String strTempRel = aTemp[0] + "," + aTemp[1] + "," + aTemp[3] + "," + aTemp[4];
+            linkHashTempRelationships.add(strTempRel);
         }
-        CommonFunction.generateFile("output/rel-output_1.1.csv", sbTableRel.toString(), false);
+        CommonFunction.generateFile("output/table-relationship-details.csv", sbTableRel.toString(), false);
+        
+        sbTableRel = new StringBuilder("From,To,ColumnFrom,ColumnTo\n");
+        Iterator it = linkHashTempRelationships.iterator();
+        while(it.hasNext()){
+            sbTableRel.append(it.next().toString() + "\n");
+        }
+        CommonFunction.generateFile("output/table-relationships.csv", sbTableRel.toString(), false);
+        
         System.out.print("Done\n");
         if (isDestinationFound) {
             System.out.println("Destination found!!!!!!!!!!!");
