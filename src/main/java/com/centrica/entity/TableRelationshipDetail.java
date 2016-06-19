@@ -54,12 +54,14 @@ public class TableRelationshipDetail extends TableRelationship {
         } else {
             StringBuilder sbOutput = new StringBuilder(this.tableNameFrom + separator + this.tableNameTo + separator + this.keyword + separator
                     + this.columnNameFrom + separator + this.columnNameTo + separator);
-            if (!this.additionalKeywordFound.isEmpty()) {
-                for (String temp : this.additionalKeywordFound) {
-                    sbOutput.append(CommonFunction.getString(temp));
-                    sbOutput.append(additionalKeywordSeparator);
+            if (this.additionalKeywordFound != null) {
+                if (!this.additionalKeywordFound.isEmpty()) {
+                    for (String temp : this.additionalKeywordFound) {
+                        sbOutput.append(CommonFunction.getString(temp));
+                        sbOutput.append(additionalKeywordSeparator);
+                    }
+                    sbOutput.setLength(sbOutput.length() - 1);
                 }
-                sbOutput.setLength(sbOutput.length() - 1);
             }
 
             sbOutput.append(separator + CommonFunction.getString(this.destinationKeywordFound));

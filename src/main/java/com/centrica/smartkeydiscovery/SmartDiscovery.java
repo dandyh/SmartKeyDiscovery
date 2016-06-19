@@ -275,7 +275,9 @@ public class SmartDiscovery {
                     columnName = temp;
                     isHeader = false;
                 } else {
-                    listTRException.add(new TableRelationship(temp[0], temp[2], -1, temp[1], temp[3], -1));
+                    if(!line.startsWith("#")){
+                        listTRException.add(new TableRelationship(temp[0], temp[2], -1, temp[1], temp[3], -1));
+                    }                    
                 }
             }
         } catch (IOException e) {
@@ -292,5 +294,21 @@ public class SmartDiscovery {
             }
         }
         return listTRException;
+    }
+    
+    public boolean isRelationshipdetailsExists(String input, List<String> allTableRelationship){
+//        for(TableRelationshipDetail temp : listRelTemp){
+//            if(temp.getTableNameFrom().equals(input.getTableNameFrom()) &&
+//                    temp.getTableNameTo().equals(input.getTableNameTo()) &&
+//                        temp.getColumnNameFrom().equals(input.getColumnNameFrom()) &&
+//                            temp.getColumnNameTo().equals(input.getColumnNameTo()) &&
+//                                temp.getKeyword().equals(input.getKeyword()) && 
+//                                    temp.tableTo.rows.size() == input.tableTo.rows.size()
+//                    )
+//                return true;
+//        }
+        if(allTableRelationship.isEmpty()) return false;
+        if(allTableRelationship.contains(input)) return true;
+        return false;        
     }
 }

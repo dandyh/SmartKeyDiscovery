@@ -23,7 +23,7 @@ import java.util.Stack;
  */
 public class App {
 
-    public static int testing = 1;
+    public static int testing = 2;
     Stack<TableRelationshipDetail> stackTRs = new Stack<>();
 
     public static void main(String[] args) throws Exception {
@@ -40,12 +40,42 @@ public class App {
         String destination = "meat pie";// "Peacock";//"Carnarvon Tigers";//Meat pie";//"laura"; //"0.15";//"Aniseed Syrup";// "Meat pie";
         
         if(testing==1){
+            keyword = "laura";
+            seededTableName = "employees";
+            additionalKeyword = "";
+            destination = "Philadelphia";//Where the employee works
+        }
+        
+        if(testing==2){
+            keyword = "Tofu";
+            seededTableName = "products";
+            additionalKeyword = "Luisenstr. 48"; //Shipping address
+            destination = "Karin Josephs"; //Customer contact name
+        }
+               
+        if(testing==3){
+            keyword = "Sir Rodney's Scones";
+            seededTableName = "products";
+            additionalKeyword = "rue des Cinquante Otages"; //Ship city
+            destination = "Janine Labrune"; //Customer contact name
+        }
+        //Need to add relationship exception and increase the searchkeyword limit
+        
+        if(testing==99){
             keyword = "meat pie";
             seededTableName = "products";
-            additionalKeyword = "forsterstr. 57,Mannheim";
+            additionalKeyword = "Mannheim";
             destination = "Romero";        
         }
         
+        System.out.print("---------------------------------------------------------\n");
+        System.out.print("-------------------System Parameters--------------------\n");
+        System.out.print("Keyword             : " + keyword + "\n");
+        System.out.print("Seed table          : " + seededTableName + "\n");
+        System.out.print("Additional Keywords : " + additionalKeyword + "\n");
+        System.out.print("Destination         : " + destination + "\n");
+        System.out.print("---------------------------------------------------------\n");
+        System.out.print("---------------------------------------------------------\n");
         //Load exception TableRelationship exception
         //type here, code here
         String filesDir = CommonFunction.readProperty("relationshipexceptionfile");
@@ -68,16 +98,17 @@ public class App {
                 }
             }
         }
-        System.out.print("Step 1 - Get initial seeded table - Done\n");
+        System.out.print("Step 0 - Load the first seeded table - Done\n");
 
         Stack<TableRelationshipDetail> stackTableRel = new Stack<>();
         while (tblSeeded != null) {            
             SchemaKeyAlgorithm ska;
             List<TableRelationshipDetail> listRelTable = new ArrayList<>();
+            
             //First step look for keyword in seeded table     
+            System.out.print("Step 1 - Generate new Seeded table with keyword filter\n");
             tblSeeded = sd.searchKeywordTable(keyword, tblSeeded);
-
-            System.out.print("Step 1a - Generate keyword table from seed\n");
+            
             boolean skipTable = true;
             
             //Step 2 - look for possible relationship with other tables
@@ -98,8 +129,8 @@ public class App {
                         skipTable = false;
                         //TableRelationshipDetail relTemp = ska.getSingleJoinKey();
                     } else {
-                        //If the table is one of the exception
-                        //Same seeded table should be also checked againts the same table
+                        //If the table is one of the exception but this seeded table has been used for this relationship before then
+                        //This relationship needs to be checked againts the same seeded
                         for (String temp : hashSeeded) {
                             if (temp.split(",")[0].equals(tblSeeded.getTableName())
                                     && temp.split(",")[1].equals(tempTableName)) {
@@ -116,6 +147,8 @@ public class App {
                     String fileLocationTemp = filesDir + "\\" + tempTable;
                     Table temp = new Table(tempTableName);
                     temp.loadFromCSV(fileLocationTemp);
+                    System.out.print("Step 2 - Look for possible relationship between ");
+                    System.out.print("Table : " + tblSeeded.getTableName() + " - " + temp.getTableName() + "\n");
                     List<TableRelationshipDetail> listRelTemp = sd.searchTableRelationshipDetail(tblSeeded, temp,
                             listTRException);
 
@@ -129,37 +162,41 @@ public class App {
                             //Check whether the table contains the destination keyword
                             String destinationKeywordTemp = sd.getTableContainsDestinationKeyword(destination, relTemp.tableTo);
                             relTemp.setDestinationKeywordFound(destinationKeywordTemp);
-                            
+
                             //Get additional keyword (If exists from the table relationship)
                             HashSet<String> additionalKeywordTemp = sd.getTableContainsKeywords(additionalKeyword.split(","), relTemp.tableTo);
                             relTemp.setAdditionalKeywordFound(additionalKeywordTemp);
 
-                            listRelTable.add(relTemp);                                                     
-                                                        
-                            hashUsedTablenames.add(relTemp.getTableNameTo());                            
-                            hashSeeded.add(tblSeeded.getTableName() + "," + relTemp.getTableNameTo());
-                            
-                            allTableRelationship.add(relTemp.getRelationshipInString(true));
-                            
-                            //If destination is found
-                            if(destinationKeywordTemp != null) {
-                                isDestinationFound = true;
-                                break;
+                            //Only add relationship, if it is not yet exists before
+                            if (!sd.isRelationshipdetailsExists(relTemp.getRelationshipInString(true), allTableRelationship)) {
+                                listRelTable.add(relTemp);
+
+                                hashUsedTablenames.add(relTemp.getTableNameTo());
+                                hashSeeded.add(tblSeeded.getTableName() + "," + relTemp.getTableNameTo());
+
+                                allTableRelationship.add(relTemp.getRelationshipInString(true));
+
+                                //If destination is found
+                                if (destinationKeywordTemp != null) {
+                                    isDestinationFound = true;
+                                    break;
+                                }
+
+                                if (relTemp.getColumnNameTo().equals("RegionID")) {
+                                    System.out.print("");
+                                }
                             }
-                            
-//                            if(relTemp.getColumnNameTo().equals("ShipperID")){
-//                                System.out.print("");
-//                            }
-                            
+
                         }
                     }
                 }
 
             }
 
-            System.out.print("Step 2 - Look for possible relationship with other tables - Done\n");
+            
 
             //Step 3 - Put relationships into stack with priority of table that have additional keyword and also remove duplicate
+            System.out.print("Step 3 - Put the relationships into stack and prioritise based on additional keywords!\n");
             if (!listRelTable.isEmpty()) {
                 listRelTable = sd.reorderRelationshipBasedonPriorities(listRelTable);
                 for (TableRelationshipDetail relTemp : listRelTable) {
@@ -183,7 +220,7 @@ public class App {
                 tblSeeded = null;
             }                        
 
-            System.out.print("Step 3 - End of loop iteration!\n");
+            System.out.print("Step 4 - End of loop iteration!\n");
 
         }
         StringBuilder sbTableRel = new StringBuilder("From,To,Keyword,ColumnFrom,ColumnTo,AdditionalKeyword,DestinationKeyword\n");
