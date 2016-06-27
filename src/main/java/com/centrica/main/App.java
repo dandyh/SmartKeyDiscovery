@@ -25,10 +25,11 @@ import java.util.Stack;
  */
 public class App {
 
-    public static int testing = 2;
+    public static int testing = 0;
     Stack<TableRelationshipDetail> stackTRs = new Stack<>();
 
     public static void main(String[] args) throws Exception {
+        String folderSeparator = "/";
         boolean isDestinationFound = false;        
         List<String> listTRComparison = new ArrayList<>();
         List<TableRelationship> listTRException = new ArrayList<>();
@@ -84,6 +85,7 @@ public class App {
         listTRException = sd.loadListTRException(filesDir);
         
         filesDir = "C:\\Users\\dandy\\OneDrive\\Documents\\NetBeansProjects\\SmartKeyDiscovery\\Data\\northwind-mongo-master";
+        filesDir = "/media/sf_!handokd1/Documents/GitHub/SmartKeyDiscovery/Data/northwind-mongo-master";
         String[] fileNames = CommonFunction.getFilenamesInFolder(filesDir);
 
         Table tblSeeded = new Table(seededTableName);
@@ -94,7 +96,7 @@ public class App {
             //Exclude table that have already checked
             if (!hashUsedTablenames.contains(CommonFunction.getFilenameOnly(tempTable))) {
                 if (CommonFunction.stringContains(tempTable, seededTableName)) {
-                    tblSeeded.loadFromCSV(filesDir + "\\" + tempTable);
+                    tblSeeded.loadFromCSV(filesDir + folderSeparator + tempTable);
 
                     hashUsedTablenames.add(seededTableName);
                 }
@@ -146,7 +148,7 @@ public class App {
                 }
                                                                                 
                 if(!skipTable){
-                    String fileLocationTemp = filesDir + "\\" + tempTable;
+                    String fileLocationTemp = filesDir + folderSeparator + tempTable;
                     Table temp = new Table(tempTableName);
                     temp.loadFromCSV(fileLocationTemp);
                     System.out.print("Step 2 - Look for possible relationship between ");
