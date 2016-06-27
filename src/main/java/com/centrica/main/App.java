@@ -29,7 +29,7 @@ public class App {
     Stack<TableRelationshipDetail> stackTRs = new Stack<>();
 
     public static void main(String[] args) throws Exception {
-        String folderSeparator = "/";
+        String folderSeparator = "\\";
         boolean isDestinationFound = false;        
         List<String> listTRComparison = new ArrayList<>();
         List<TableRelationship> listTRException = new ArrayList<>();
@@ -39,7 +39,7 @@ public class App {
         
         String keyword = "Blauer see delikatessen";
         String seededTableName = "customers";
-        String additionalKeyword = "forsterstr. 57,Mannheim";
+        String additionalKeyword = "";// "forsterstr. 57,Mannheim";
         String destination = "meat pie";// "Peacock";//"Carnarvon Tigers";//Meat pie";//"laura"; //"0.15";//"Aniseed Syrup";// "Meat pie";
         
         if(testing==1){
@@ -84,8 +84,8 @@ public class App {
         String filesDir = CommonFunction.readProperty("relationshipexceptionfile");
         listTRException = sd.loadListTRException(filesDir);
         
-        filesDir = "C:\\Users\\dandy\\OneDrive\\Documents\\NetBeansProjects\\SmartKeyDiscovery\\Data\\northwind-mongo-master";
-        filesDir = "/media/sf_!handokd1/Documents/GitHub/SmartKeyDiscovery/Data/northwind-mongo-master";
+        filesDir = CommonFunction.readProperty("inputfilesdir");
+        //filesDir = "/media/sf_!handokd1/Documents/GitHub/SmartKeyDiscovery/Data/northwind-mongo-master";
         String[] fileNames = CommonFunction.getFilenamesInFolder(filesDir);
 
         Table tblSeeded = new Table(seededTableName);
@@ -105,13 +105,15 @@ public class App {
         System.out.print("Step 0 - Load the first seeded table - Done\n");
 
         Stack<TableRelationshipDetail> stackTableRel = new Stack<>();
+        tblSeeded = sd.searchKeywordTable(keyword, tblSeeded);
+        
         while (tblSeeded != null) {            
             SchemaKeyAlgorithm ska;
             List<TableRelationshipDetail> listRelTable = new ArrayList<>();
             
             //First step look for keyword in seeded table     
             System.out.print("Step 1 - Generate new Seeded table with keyword filter\n");
-            tblSeeded = sd.searchKeywordTable(keyword, tblSeeded);
+            
             
             boolean skipTable = true;
             
@@ -186,9 +188,9 @@ public class App {
                                     break;
                                 }
 
-                                if (relTemp.getColumnNameTo().equals("RegionID")) {
-                                    System.out.print("");
-                                }                               
+//                                if (relTemp.getColumnNameTo().equals("RegionID")) {
+//                                    System.out.print("");
+//                                }                               
                             }
 
                         }

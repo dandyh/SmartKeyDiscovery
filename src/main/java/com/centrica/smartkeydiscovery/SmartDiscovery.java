@@ -85,7 +85,7 @@ public class SmartDiscovery {
         int index = 0;
         List<TableRelationshipDetail> rel = new ArrayList<TableRelationshipDetail>();
 
-        if(isByColumn){
+        if (isByColumn) {
             for (int i = 0; i < inputTable.columnName.length; i++) {
 
                 //Skip Relationship checking if it is on the black listed relationship
@@ -111,7 +111,7 @@ public class SmartDiscovery {
                     }
                 }
             }
-        }else {//Skip Relationship checking if it is on the black listed relationship
+        } else {//Skip Relationship checking if it is on the black listed relationship
 
             for (int z = 0; z < inputTable.rows.size(); z++) {
                 for (int i = 0; i < inputTable.columnName.length; i++) {
@@ -197,14 +197,14 @@ public class SmartDiscovery {
     public List<TableRelationshipDetail> reorderRelationshipBasedonPriorities(List<TableRelationshipDetail> listTRInput) throws Exception {
         //To remove duplicate
         List<String> listComparator = new ArrayList<>();
-        
+
         List<TableRelationshipDetail> trOutput = new ArrayList<>();
         //Put relationship without additional keywords and destination first (at the bottom)
         for (int i = 0; i < listTRInput.size(); i++) {
             if (listTRInput.get(i).getAdditionalKeywordFound().isEmpty()
                     && CommonFunction.stringIsEmpty(listTRInput.get(i).getDestinationKeywordFound())) {
-                
-                if(!listComparator.contains(listTRInput.get(i).getRelationshipInString(true))){
+
+                if (!listComparator.contains(listTRInput.get(i).getRelationshipInString(true))) {
                     trOutput.add(listTRInput.get(i));
                     listComparator.add(listTRInput.get(i).getRelationshipInString(true));
                 }
@@ -213,8 +213,8 @@ public class SmartDiscovery {
         //Put relationship WITH additional keywords later (in the middle)
         for (int i = 0; i < listTRInput.size(); i++) {
             if (!listTRInput.get(i).getAdditionalKeywordFound().isEmpty()
-                    && CommonFunction.stringIsEmpty(listTRInput.get(i).getDestinationKeywordFound())) {                
-                if(!listComparator.contains(listTRInput.get(i).getRelationshipInString(true))){
+                    && CommonFunction.stringIsEmpty(listTRInput.get(i).getDestinationKeywordFound())) {
+                if (!listComparator.contains(listTRInput.get(i).getRelationshipInString(true))) {
                     trOutput.add(listTRInput.get(i));
                     listComparator.add(listTRInput.get(i).getRelationshipInString(true));
                 }
@@ -224,7 +224,7 @@ public class SmartDiscovery {
         //Put destination Table at the last (On top)
         for (int i = 0; i < listTRInput.size(); i++) {
             if (!CommonFunction.stringIsEmpty(listTRInput.get(i).getDestinationKeywordFound())) {
-                if(!listComparator.contains(listTRInput.get(i).getRelationshipInString(true))){
+                if (!listComparator.contains(listTRInput.get(i).getRelationshipInString(true))) {
                     trOutput.add(listTRInput.get(i));
                     listComparator.add(listTRInput.get(i).getRelationshipInString(true));
                 }
@@ -242,6 +242,14 @@ public class SmartDiscovery {
             return false;
         }
         for (TableRelationship trTemp : listTRException) {
+
+            //if list of exception only contains tablefrom and to without column names
+            if (trTemp.getColumnNameFrom().equals("*") && trTemp.getColumnNameTo().equals("*")) {
+                if (CommonFunction.stringEquals(trTemp.getTableNameFrom(), tableNameFrom)
+                        && CommonFunction.stringEquals(trTemp.getTableNameTo(), tableNameTo)) {
+                    return true;
+                }
+            }
             if (CommonFunction.stringEquals(trTemp.getTableNameFrom(), tableNameFrom)
                     && CommonFunction.stringEquals(trTemp.getColumnNameFrom(), columnNameFrom)
                     && CommonFunction.stringEquals(trTemp.getTableNameTo(), tableNameTo)
@@ -274,10 +282,13 @@ public class SmartDiscovery {
                 if (isHeader) {
                     columnName = temp;
                     isHeader = false;
-                } else {
-                    if(!line.startsWith("#")){
+                } else if (!line.startsWith("#")) {
+                    if (temp.length == 4) {
                         listTRException.add(new TableRelationship(temp[0], temp[2], -1, temp[1], temp[3], -1));
-                    }                    
+                    } else {
+                        throw (new Exception("Invalid relationshipexception file format"));
+                    }
+
                 }
             }
         } catch (IOException e) {
@@ -295,8 +306,8 @@ public class SmartDiscovery {
         }
         return listTRException;
     }
-    
-    public boolean isRelationshipdetailsExists(String input, List<String> allTableRelationship){
+
+    public boolean isRelationshipdetailsExists(String input, List<String> allTableRelationship) {
 //        for(TableRelationshipDetail temp : listRelTemp){
 //            if(temp.getTableNameFrom().equals(input.getTableNameFrom()) &&
 //                    temp.getTableNameTo().equals(input.getTableNameTo()) &&
@@ -307,8 +318,12 @@ public class SmartDiscovery {
 //                    )
 //                return true;
 //        }
-        if(allTableRelationship.isEmpty()) return false;
-        if(allTableRelationship.contains(input)) return true;
-        return false;        
+        if (allTableRelationship.isEmpty()) {
+            return false;
+        }
+        if (allTableRelationship.contains(input)) {
+            return true;
+        }
+        return false;
     }
 }
