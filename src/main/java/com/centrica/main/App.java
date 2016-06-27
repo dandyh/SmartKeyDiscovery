@@ -21,7 +21,7 @@ import java.util.Stack;
 
 /**
  *
- * @author dandy
+ * @author dandy handoko
  */
 public class App {
 
