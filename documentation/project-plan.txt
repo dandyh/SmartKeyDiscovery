@@ -1,18 +1,27 @@
 Features:
 
-1. Using Stack so it will execute all of the relationship possibilities (Limited to list of tables) + prioritise the relationship with additional keyword
+1. Using Depth-first search algorithm with priorities
+Using Stack so it will execute all of the relationship possibilities (Limited to list of tables that has already been used) + prioritise the relationship with additional keyword
+
 2. Parameter based (config.cfg)
 	-> You can set the search limit
+
+3. Faster than Brute force, because:
+	a. Using Customer knowledge rather than building from scratch (From, to and destination)
+	b. Use stack method with proirities
+	c. Have relationship exception list
+	
+4. The code is unit tested, to minimise bugs
 	
 
 
 Next:
 
-1. (When destination word is not found) Use Machine learning, to learn why the join is wrong, and update the list of wrong join relationship
+1. Save the paths that were used, so it can be used to enhance the next execution performance 
+
+2. (When destination word is not found) Use Machine learning, to learn why the join is wrong, and update the list of wrong join relationship
 	- Might use a parameter to set the limit of number iteration to be ran
 	- Run the new program based on the mistakes made in the previous sessions (Learn)
-	
-
 	
 Limitation:
 

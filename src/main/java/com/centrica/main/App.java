@@ -29,6 +29,7 @@ public class App {
     Stack<TableRelationshipDetail> stackTRs = new Stack<>();
 
     public static void main(String[] args) throws Exception {
+        List<String> listExecutionSequence = new ArrayList<>();
         String folderSeparator = "\\";
         boolean isDestinationFound = false;        
         List<String> listTRComparison = new ArrayList<>();
@@ -39,7 +40,7 @@ public class App {
         
         String keyword = "Blauer see delikatessen";
         String seededTableName = "customers";
-        String additionalKeyword = "";// "forsterstr. 57,Mannheim";
+        String additionalKeyword = "";// // "forsterstr. 57,Mannheim";
         String destination = "meat pie";// "Peacock";//"Carnarvon Tigers";//Meat pie";//"laura"; //"0.15";//"Aniseed Syrup";// "Meat pie";
         
         if(testing==1){
@@ -185,6 +186,7 @@ public class App {
                                 //If destination is found
                                 if (destinationKeywordTemp != null) {
                                     isDestinationFound = true;
+                                    listExecutionSequence.add(relTemp.getRelationshipInString(true));
                                     break;
                                 }
 
@@ -222,6 +224,7 @@ public class App {
                 TableRelationshipDetail relTemp = stackTableRel.pop();
                 tblSeeded = relTemp.tableTo;
                 keyword = relTemp.getKeyword();
+                listExecutionSequence.add(relTemp.getRelationshipInString(true));
             } else {
                 tblSeeded = null;
             }                        
@@ -246,12 +249,22 @@ public class App {
         }
         CommonFunction.generateFile("output/table-relationship-summary.csv", sbTableRel.toString(), false);
         
+        
+        sbTableRel = new StringBuilder("From,To,ColumnFrom,ColumnTo\n");
+        it = listExecutionSequence.iterator();
+        while(it.hasNext()){
+            sbTableRel.append(it.next().toString() + "\n");
+        }
+        CommonFunction.generateFile("output/execution-sequence.csv", sbTableRel.toString(), false);
+        
+        
         System.out.print("Done\n");
         if (isDestinationFound) {
             System.out.println("Destination found!!!!!!!!!!!");
         } else {
             System.out.println("Destination NOT found!");
         }
+        
     }
 
 }
